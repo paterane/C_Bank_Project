@@ -1,0 +1,13 @@
+{
+    "files.associations": {
+        "bankHandle.h": "c",
+        "stdlib.h": "c",
+        "stdio.h": "c",
+        "cmath": "c",
+        "limits": "c",
+        "*.tcc": "c",
+        "type_traits": "c",
+        "conio.h": "c",
+        "utils.h": "c"
+    }
+}

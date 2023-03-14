@@ -1,0 +1,3 @@
+"C:\Program Files\CMake\bin\cmake.exe" -E rm -f CMakeFiles\bank.dir/objects.a
+C:\MinGW\bin\ar.exe qc CMakeFiles\bank.dir/objects.a @CMakeFiles\bank.dir\objects1.rsp
+C:\MinGW\bin\gcc.exe -g -Wl,--whole-archive CMakeFiles\bank.dir/objects.a -Wl,--no-whole-archive -o D:\CClass\NCC_CLASS\Bank_Project\executable\bank.exe -Wl,--out-implib,libbank.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\bank.dir\linkLibs.rsp

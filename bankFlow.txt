@@ -1,0 +1,21 @@
+Id >> id
+Name >> name
+NRC >> nrc
+Email >> email
+Password >> pass
+Personal or Business >> isPer
+Loan_status >> loan_status
+Monthly_income >> income
+Loan_amount >> loan_amt
+Loan_rate >> loan_rate
+AccountStatus >> acc_status
+Account_Level >> acc_level
+PhNumber >> phone
+Current_amount >> curr_amt
+Address >> address
+Transaction Record >> transRC 
+
+csv format
+1,Peter Oo,12/thalana<N>117395,peteroomm@gmail.com,1234Peter##,1000,09421074860, 500, NO(1)/goland st/NY, 1
+
+id,name,nrc,email,pass,phone,address,curr_amt,income,loan_amt,loan_rate,isPer,acc_status,loan_status,translimit,records,transactions

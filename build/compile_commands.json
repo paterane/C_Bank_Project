@@ -1,0 +1,20 @@
+[
+{
+  "directory": "D:/CClass/NCC_CLASS/Bank_Project/build",
+  "command": "C:\\MinGW\\bin\\gcc.exe  @CMakeFiles/bank.dir/includes_C.rsp -g -std=gnu11 -o CMakeFiles\\bank.dir\\main.c.obj -c D:\\CClass\\NCC_CLASS\\Bank_Project\\main.c",
+  "file": "D:/CClass/NCC_CLASS/Bank_Project/main.c",
+  "output": "CMakeFiles/bank.dir/main.c.obj"
+},
+{
+  "directory": "D:/CClass/NCC_CLASS/Bank_Project/build",
+  "command": "C:\\MinGW\\bin\\gcc.exe   -g -std=gnu11 -o CMakeFiles\\bnkfunc.dir\\include\\bankHandle.c.obj -c D:\\CClass\\NCC_CLASS\\Bank_Project\\include\\bankHandle.c",
+  "file": "D:/CClass/NCC_CLASS/Bank_Project/include/bankHandle.c",
+  "output": "CMakeFiles/bnkfunc.dir/include/bankHandle.c.obj"
+},
+{
+  "directory": "D:/CClass/NCC_CLASS/Bank_Project/build",
+  "command": "C:\\MinGW\\bin\\gcc.exe   -g -std=gnu11 -o CMakeFiles\\bnkfunc.dir\\include\\utils.c.obj -c D:\\CClass\\NCC_CLASS\\Bank_Project\\include\\utils.c",
+  "file": "D:/CClass/NCC_CLASS/Bank_Project/include/utils.c",
+  "output": "CMakeFiles/bnkfunc.dir/include/utils.c.obj"
+}
+]

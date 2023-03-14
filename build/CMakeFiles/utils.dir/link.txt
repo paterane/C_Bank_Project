@@ -1,0 +1,2 @@
+C:\MinGW\bin\ar.exe qc D:\CClass\NCC_CLASS\Bank_Project\lib\libutils.a CMakeFiles/utils.dir/include/utils.c.obj
+C:\MinGW\bin\ranlib.exe D:\CClass\NCC_CLASS\Bank_Project\lib\libutils.a
