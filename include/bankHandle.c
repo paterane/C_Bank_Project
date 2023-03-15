@@ -151,23 +151,39 @@ user_sector(){
                 printf("Enter a phone number to receive: ");
                 scanf(" %[^\n]%*c", userIn);
                 isPhoneExisted(userIn);
-                if(uIndex == -1){
-                    printf("Received user's phone number not existed\n");
-                    printf("Press 1 to user_sector or anykey to re-submit: ");
-                    scanf(" %d", &choice);
-                    if(choice == 1) user_sector();
-                }else break;
+                if(uIndex != userFound){
+                    if(uIndex == -1){
+                        printf("Received user's phone number not existed\n");
+                        printf("Press 1 to user_sector or <enter> to re-submit: ");
+                        fgets(userIn, 30, stdin);
+                        if(stringCmp(userIn, "1\n")) user_sector();
+                    }else break;                    
+                }
+                else{
+                    printf("Sorry you can't transfer to your same account\nPress 1 to user_sector or <enter> to re-submit: ");
+                    fgets(userIn, 30, stdin);
+                    if(stringCmp(userIn, "1\n")) user_sector();
+                }
             }
             phFound = uIndex;
             printf("Recipient found: %s\nEmail: %s\n", userdb[phFound].name, userdb[phFound].email);
             while(1){
+                printf("Minimum amount allowable to be transferred >> 10USD\n");
                 printf("Enter an amount to be transferred: ");
                 scanf(" %d", &choice);
-                if(userdb[userFound].curr_amt-2>=choice) break;
+                fflush(stdin);
+                if(choice >= 10){
+                    if(userdb[userFound].curr_amt-2>=choice) break;
+                    else{
+                        printf("Insufficient balance\nPress 1 to user_sector or <enter> to re-submit: ");
+                        fgets(userIn, 30, stdin);
+                        if(stringCmp(userIn, "1\n")) user_sector();
+                    }
+                }
                 else{
-                    printf("Insufficient balance\nPress 1 to user_sector or anykey to re-submit: ");
-                    scanf(" %d", &choice);
-                    if(choice == 1) user_sector();
+                    printf("Transferred amount shouldn't be less than 10USD\nPress 1 to user_sector or <enter> to re-submit: ");
+                    fgets(userIn, 30, stdin);
+                    if(stringCmp(userIn, "1\n")) user_sector(); 
                 }
             }
             int amount_t = choice;
@@ -176,30 +192,31 @@ user_sector(){
                 scanf(" %[^\n]%*c", userIn);
                 if(stringCmp(userIn, userdb[userFound].pass)) break;
                 else{
-                    printf("Wrong credential\nPress 1 to user_sector or anykey to re-submit: ");
-                    scanf(" %d", &choice);
-                    if(choice == 1) user_sector();
+                    printf("Wrong credential\nPress 1 to user_sector or <enter> to re-submit: ");
+                    fgets(userIn, 30, stdin);
+                    if(stringCmp(userIn, "1\n")) user_sector();
                 }
             }
             transfer_money(userFound, phFound, amount_t);
         }
         else if(stringCmp(wordLower(userIn), "withdraw")){
             while(1){
-                printf("Maximum allowable amount at a time >> 500USD\nMinimum amount >> 10USD\n");
+                printf("Minimum amount allowable to be transferred >> 10USD\n");
                 printf("Submit amount to be withdrawn: ");
                 scanf(" %d", &choice);
-                if(choice >= 10 && choice <= 500){
+                fflush(stdin);
+                if(choice >= 10){
                     if(userdb[userFound].curr_amt-2 >= choice) break;
                     else{
-                        printf("Amount not in the allowable limits\nPress 1 to user_sector or anykey to re-submit: ");
-                        scanf(" %d", &choice);
-                        if(choice == 1) user_sector(); 
+                        printf("Insufficient amount in the account\nPress 1 to user_sector or <enter> to re-submit: ");
+                        fgets(userIn, 30, stdin);
+                        if(stringCmp(userIn, "1\n")) user_sector(); 
                     }
                 }
                 else{   
-                    printf("Amount not in the allowable limits\nPress 1 to user_sector or anykey to re-submit: ");
-                    scanf(" %d", &choice);
-                    if(choice == 1) user_sector();            
+                    printf("Amount not in the allowable limits\nPress 1 to user_sector or <enter> to re-submit: ");
+                    fgets(userIn, 30, stdin);
+                    if(stringCmp(userIn, "1\n")) user_sector();            
                 }
             }
             cashIn_withdraw(userFound, choice, WITHDRAW);
@@ -217,15 +234,15 @@ user_sector(){
         }
         else if(stringCmp(wordLower(userIn), "cash in")){
             while(1){
-                printf("Maximum allowable amount at a time >> 500USD\n");
-                printf("Minimum amount >> 10USD\n");
+                printf("Minimum amount allowable to be transferred >> 10USD\n");
                 printf("Please insert CASH in the slot: ");
                 scanf(" %d", &choice);
-                if(choice >= 10 && choice <= 500) break;
+                fflush(stdin);
+                if(choice >= 10) break;
                 else{
-                    printf("Amount not in the allowable limits\nPress 1 to user_sector or anykey to re-submit: ");
-                    scanf(" %d", &choice);
-                    if(choice == 1) user_sector();
+                    printf("Amount not in the allowable limits\nPress 1 to user_sector or <enter> to re-submit: ");
+                    fgets(userIn, 30, stdin);
+                    if(stringCmp(userIn, "1\n")) user_sector();
                 }
             }
             cashIn_withdraw(userFound, choice, CASH_IN);
@@ -245,9 +262,9 @@ void login_section(){
     char uPass[50];
     printf("LOGIN SECTOR\n");
     printf("Email: ");
-    scanf(" %s", uEmail);
+    scanf(" %[^\n]%*c", uEmail);
     printf("Password: ");
-    scanf(" %s", uPass);
+    scanf(" %[^\n]%*c", uPass);
     isEmailExisted(uEmail);
     if(uIndex != -1){
         if(!stringCmp(uPass, userdb[uIndex].pass)){
@@ -343,7 +360,7 @@ int isPassValid(char *pass){
 }
 void mail_form(){
     printf("An Email: ");
-    scanf(" %s", userdb[dbIndex].email);
+    scanf(" %[^\n]%*c", userdb[dbIndex].email);
     if(isMailValid(userdb[dbIndex].email, "a-z0-9")){
         isEmailExisted(userdb[dbIndex].email);
         if(uIndex == -1){
@@ -362,7 +379,7 @@ void mail_form(){
 }
 void nrc_form(){
     printf("NRC number: ");
-    scanf(" %s", userdb[dbIndex].nrc);
+    scanf(" %[^\n]%*c", userdb[dbIndex].nrc);
     if(isNRCValid(userdb[dbIndex].nrc)){
         isNRCExisted(userdb[dbIndex].nrc);
         if(uIndex != -1){
@@ -406,7 +423,7 @@ int isPhoneValid(char *ph){
 }
 void phone_form(){
     printf("Enter a phone number: ");
-    scanf(" %s", userdb[dbIndex].phone);
+    scanf(" %[^\n]%*c", userdb[dbIndex].phone);
     if(isPhoneValid(userdb[dbIndex].phone)){
         isPhoneExisted(userdb[dbIndex].phone);
         if(uIndex != -1){
@@ -431,10 +448,12 @@ void registration(){
     userdb[dbIndex].curr_amt = 100; // default money amount in account for initial state
     printf("Enter monthly income: ");
     scanf(" %d", &userdb[dbIndex].income);
+    fflush(stdin);
     userdb[dbIndex].loan_amt = 0; // default loan clear
     userdb[dbIndex].loan_rate = 0.3; // bank's default loan interest
     printf("account-type[1 for Personal or 0 for business]: ");
     scanf(" %d", &choice);
+    fflush(stdin);
     userdb[dbIndex].isPer = choice;
     userdb[dbIndex].acc_status = 1; // default account active
     userdb[dbIndex].loan_status = 0; // default loan status clear
@@ -444,6 +463,7 @@ void registration(){
     dbIndex++;  //Updating user count after successful registeration
     printf("Press 1 to go back to Main page or 0 to exit: ");
     scanf(" %d",&choice);
+    fflush(stdin);
     if(choice==1) welcome();
     else          exitProgram();
 }
@@ -452,7 +472,7 @@ void welcome(){
     printf("Welcome to ebanking service\n");
     while(1){
         printf("[login, register or exit]: ");
-        scanf(" %s", userIn);
+        scanf(" %[^\n]%*c", userIn);
         if(stringCmp(wordLower(userIn), "login")) login_section();
         else if(stringCmp(wordLower(userIn), "register")) registration();
         else if(stringCmp(wordLower(userIn), "exit")) exitProgram();
@@ -463,10 +483,11 @@ void welcome(){
     particular function call to shorten the repeated codes
 */
 void funcCall(void(*f)(), char *fname){
-    printf("Press 1 to main page or 0 to %s: ", fname);
-    scanf(" %d", &choice);
-    if(choice==1)  welcome();
-    else        f();
+    char userIn[30] = {0};
+    printf("Press 1 to main page or <enter> to %s: ", fname);
+    fgets(userIn, 30, stdin);
+    if(stringCmp(userIn, "1\n"))    welcome();
+    else    f();
 }
 /*
     Save data to file and exit the program
