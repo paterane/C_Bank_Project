@@ -271,7 +271,7 @@ char *toChar(int a){
     int count = 1;
     int j=0;
     char *digit = (char*)malloc(11*sizeof(char));
-    int sign = (a&0x8000)? 1 : 0;
+    int sign = (a&0x80000000)? 1 : 0;
     if(sign){
         a = (~a)+1;
         digit[0] = '-';

@@ -29,7 +29,7 @@ typedef struct{
     unsigned int loan_amt; // amount burrowed from bank
     float loan_rate; // interest
     unsigned int isPer: 1; // Personal or business account
-    unsigned int acc_lvl: 2; // 0 low, 1 normal, 2 special
+    // unsigned int acc_lvl: 2; // 0 low, 1 normal, 2 special
     unsigned int acc_status: 1; // 1 for active, 0 for suspended
     unsigned int loan_status: 1; // 1 for burrowed, 0 for loan clear
     int transLimit; //transaction amount limit per day
@@ -44,7 +44,7 @@ int uIndex = -1; //Special index to be used in searching user index
 int userFound = -1; //General userIndex that can be used if the index is to be returned
 int phFound = -1; //General userIndex that can be used if the index is to be returned
 int nrcFound = -1; //General userIndex that can be used if the index is to be returned
-int choice = 0;  //General user selection
+unsigned int choice = 0;  //General user selection
 
 /***************************************************************************************/
 //////////////////////////////////Bank Functions/////////////////////////////////////////
@@ -86,18 +86,18 @@ void isPhoneExisted(char *ph){
 /*
     xxx USD your process string[MM-DD-YY H:M]
 */
-void transaction_record(int amount, int process){
+void transaction_record(unsigned int amount, int process){
     char time_buff[30] = {'\0'};
     current_time(time_buff, 30); 
     if(process == TRANSFER_MONEY){
         char *sender = toChar(amount);
         char *recipient = toChar(amount);
-        stringConcat(&sender, "USD transferred to ");
+        stringConcat(&sender, "MMK transferred to ");
         stringConcat(&sender, userdb[phFound].name);
         stringConcat(&sender, time_buff);
         stringCopy(sender, userdb[userFound].record[userdb[userFound].tIndex].note);
         userdb[userFound].tIndex++;
-        stringConcat(&recipient, "USD recieved from ");
+        stringConcat(&recipient, "MMK recieved from ");
         stringConcat(&recipient, userdb[userFound].name);
         stringConcat(&recipient, time_buff);
         stringCopy(recipient, userdb[phFound].record[userdb[phFound].tIndex].note);
@@ -105,20 +105,20 @@ void transaction_record(int amount, int process){
     }
     else if(process == CASH_IN){
         char *newTrans = toChar(amount);
-        stringConcat(&newTrans, "USD saved in the account");
+        stringConcat(&newTrans, "MMK saved in the account");
         stringConcat(&newTrans, time_buff);
         stringCopy(newTrans, userdb[userFound].record[userdb[userFound].tIndex].note);
         userdb[userFound].tIndex++;
     }
     else if(process == WITHDRAW){
         char *newTrans = toChar(amount);
-        stringConcat(&newTrans, "USD withdrawn from the account");
+        stringConcat(&newTrans, "MMK withdrawn from the account");
         stringConcat(&newTrans, time_buff);
         stringCopy(newTrans, userdb[userFound].record[userdb[userFound].tIndex].note);
         userdb[userFound].tIndex++;
     }
     else if(process == LOAN){
-        printf("record not available\n");
+        printf("LOAN record process not available\n");
     }
 }
 void transfer_money(int idxS, int idxR, int amount){
@@ -168,12 +168,12 @@ user_sector(){
             phFound = uIndex;
             printf("Recipient found: %s\nEmail: %s\n", userdb[phFound].name, userdb[phFound].email);
             while(1){
-                printf("Minimum amount allowable to be transferred >> 10USD\n");
+                printf("Minimum amount allowable to be transferred >> 1000MMK\n");
                 printf("Enter an amount to be transferred: ");
                 scanf(" %d", &choice);
                 fflush(stdin);
                 if(choice >= 10){
-                    if(userdb[userFound].curr_amt-2>=choice) break;
+                    if(userdb[userFound].curr_amt-1000>=choice) break;
                     else{
                         printf("Insufficient balance\nPress 1 to user_sector or <enter> to re-submit: ");
                         fgets(userIn, 30, stdin);
@@ -201,12 +201,12 @@ user_sector(){
         }
         else if(stringCmp(wordLower(userIn), "withdraw")){
             while(1){
-                printf("Minimum amount allowable to be transferred >> 10USD\n");
+                printf("Minimum amount allowable to be withdrawn >> 5000MMK\n");
                 printf("Submit amount to be withdrawn: ");
                 scanf(" %d", &choice);
                 fflush(stdin);
-                if(choice >= 10){
-                    if(userdb[userFound].curr_amt-2 >= choice) break;
+                if(choice >= 5000){
+                    if(userdb[userFound].curr_amt-1000 >= choice) break;
                     else{
                         printf("Insufficient amount in the account\nPress 1 to user_sector or <enter> to re-submit: ");
                         fgets(userIn, 30, stdin);
@@ -223,10 +223,10 @@ user_sector(){
 
         }
         else if(stringCmp(wordLower(userIn), "info")){
-            printf("Name: %s\nNRC: %s\nEmail: %s\nPhone: %s\nAddress: %s\nBalance: %u\n", userdb[userFound].name, userdb[userFound].nrc,
+            printf("Name: %s\nNRC: %s\nEmail: %s\nPhone: %s\nAddress: %s\nBalance: %uMMK\n", userdb[userFound].name, userdb[userFound].nrc,
                                                             userdb[userFound].email, userdb[userFound].phone,
                                                             userdb[userFound].address, userdb[userFound].curr_amt);
-            printf("Income: %u\nloan amount:%u\n[Acc_Type: %s]\t[Acc_Status: %s]\t[Loan_Status: %s]\n", userdb[userFound].income,
+            printf("Income: %uMMK\nloan amount:%uMMK\n[Acc_Type: %s]\t[Acc_Status: %s]\t[Loan_Status: %s]\n", userdb[userFound].income,
                                                     userdb[userFound].loan_amt,
                                                     (userdb[userFound].isPer)? "Personal":"Business",
                                                     (userdb[userFound].acc_status)? "Active":"Suspended",
@@ -234,11 +234,11 @@ user_sector(){
         }
         else if(stringCmp(wordLower(userIn), "cash in")){
             while(1){
-                printf("Minimum amount allowable to be transferred >> 10USD\n");
+                printf("Minimum amount allowable to be submitted >> 5000MMK\n");
                 printf("Please insert CASH in the slot: ");
                 scanf(" %d", &choice);
                 fflush(stdin);
-                if(choice >= 10) break;
+                if(choice >= 5000) break;
                 else{
                     printf("Amount not in the allowable limits\nPress 1 to user_sector or <enter> to re-submit: ");
                     fgets(userIn, 30, stdin);
@@ -436,7 +436,7 @@ void phone_form(){
         funcCall(phone_form, "phone_form");
     }
 }
-// TO-DO: acc_lvl
+
 void registration(){
     printf("USER REGISTRATION\n");
     mail_form();
@@ -445,20 +445,21 @@ void registration(){
     phone_form();
     printf("Address: ");
     scanf(" %[^\n]%*c", userdb[dbIndex].address);
-    userdb[dbIndex].curr_amt = 100; // default money amount in account for initial state
+    userdb[dbIndex].curr_amt = 1000;            // default money amount in account for initial state
     printf("Enter monthly income: ");
     scanf(" %d", &userdb[dbIndex].income);
     fflush(stdin);
-    userdb[dbIndex].loan_amt = 0; // default loan clear
-    userdb[dbIndex].loan_rate = 0.3; // bank's default loan interest
+    userdb[dbIndex].loan_amt = 0;               // default loan clear
+    userdb[dbIndex].loan_rate = 0.3;            // bank's default loan interest
     printf("account-type[1 for Personal or 0 for business]: ");
     scanf(" %d", &choice);
     fflush(stdin);
     userdb[dbIndex].isPer = choice;
-    userdb[dbIndex].acc_status = 1; // default account active
-    userdb[dbIndex].loan_status = 0; // default loan status clear
-    userdb[dbIndex].transLimit = 10; // default limit 10 per time
-    userdb[dbIndex].id = dbIndex + 1; // last index number is next id number
+    userdb[dbIndex].acc_status = 1;                                       // default account active
+    userdb[dbIndex].loan_status = 0;                                      // default loan status clear
+    if(userdb[dbIndex].isPer == 1)  userdb[dbIndex].transLimit = 1000000; // 1,000,000 MMK per day
+    else    userdb[dbIndex].transLimit = 10000000;                        // 10,000,000 MMK per day
+    userdb[dbIndex].id = dbIndex + 1;                                     // last index number is next id number
     printf("Registeration succeeded.\n");
     dbIndex++;  //Updating user count after successful registeration
     printf("Press 1 to go back to Main page or 0 to exit: ");
