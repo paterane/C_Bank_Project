@@ -20,5 +20,6 @@ char *toChar(int a);
 int isNum(char *str);
 int regExpress(char *str, char *pattern);
 void current_time(char *buff, size_t b_size);
+int month_number(char *abbreviated_month);
 
 #endif // INCLUDE_UTILS_H

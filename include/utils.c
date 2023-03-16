@@ -350,6 +350,9 @@ int regExpress(char *str, char *pattern){
 //////////////////////////////////////////////////////////////////////////
 /* ***********************Time Related Functions*********************** */
 //////////////////////////////////////////////////////////////////////////
+
+// Array of Months Abbreviation
+char month_name[][3] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 /*
     Call local time in customized format
     buff: pointer to character capable of holding formatted characters
@@ -359,5 +362,29 @@ void current_time(char *buff, size_t b_size){
     time_t timer;
     time(&timer);
     struct tm *timeInfo = localtime(&timer);
-    strftime(buff, b_size, "[%b-%d-%Y %I:%M%p]", timeInfo); //[MM-DD-YY H:M]
+    strftime(buff, b_size, "[%b-%d-%Y-%I:%M%p]", timeInfo); //[MM-DD-YY-H:M]
 }
+/*
+    RETURN : decimal number of a given Abbreviated Month, if not found, RETURN: -1
+*/
+int month_number(char *abbreviated_month){
+    int found = -1;
+    for(int m=0; m<12; m++){
+        if(stringCmp(month_name[m], abbreviated_month)){
+            found = m;
+            break;
+        }
+    }
+    return found;
+}
+
+
+// Monitoring Moth Abbreviation
+// time_t timer;
+// struct tm *timeInfo = localtime(&timer);
+// for(int i=0; i<12; i++){
+//     timeInfo->tm_mon = i;
+//     char buff[5] = {0};
+//     strftime(buff, 5, "%b", timeInfo);
+//     printf("%s\n", buff);
+// }

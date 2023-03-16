@@ -11,6 +11,12 @@
 #define CASH_IN        1
 #define WITHDRAW       2
 #define LOAN           3
+/* dd-mm-yy info structure*/
+struct Date{
+    int dd;
+    int mm;
+    int yy;
+};
 /* User transaction */
 struct Transaction{
     char note[100];
@@ -32,7 +38,7 @@ typedef struct{
     // unsigned int acc_lvl: 2; // 0 low, 1 normal, 2 special
     unsigned int acc_status: 1; // 1 for active, 0 for suspended
     unsigned int loan_status: 1; // 1 for burrowed, 0 for loan clear
-    int transLimit; //transaction amount limit per day
+    unsigned int transLimit; //transaction amount limit per day
     struct Transaction record[100]; // transaction records per user
     int tIndex; //transaction index
 }db;
@@ -121,24 +127,89 @@ void transaction_record(unsigned int amount, int process){
         printf("LOAN record process not available\n");
     }
 }
-void transfer_money(int idxS, int idxR, int amount){
-    userdb[idxS].curr_amt -= amount;
-    userdb[idxR].curr_amt += amount;
-    transaction_record(amount, TRANSFER_MONEY);
-    printf("Transaction completed\n");
-    printf("Transaction: %s\n", userdb[userFound].record[userdb[userFound].tIndex-1].note);
-    printf("Balance: %u\n", userdb[userFound].curr_amt);
+/* Take amount from transaction record and RETRUN as INT */
+int get_amount_from_trans(char *transact){
+    char *temp = subString(transact, 0, indexOf(transact, "MMK"));
+    int amount = toInt(temp);
+    return amount;
 }
-void cashIn_withdraw(int uIdx, int amount, int process){
-    if(process==CASH_IN){
-        userdb[uIdx].curr_amt += amount;
-        transaction_record(amount, CASH_IN);
+/* Transform [mm-dd-yy-H:M] format to struct Date format to be arithmetically operated */
+struct Date *str_To_StructDate(char *strDate){
+    int start = indexOf(strDate, "[");
+    int end = indexOf(strDate, "]");
+    strDate = subString(strDate, start+1, end);
+    struct Date *date = (struct Date*)malloc(sizeof(struct Date));
+    int col = 0;
+    char *temp = NULL;
+    while((temp=readLine_csv(strDate, '-'))){
+        switch(col){
+            case 0: date->mm = month_number(temp); break;
+            case 1: date->dd = toInt(temp); break;
+            case 2: date->yy = toInt(temp); break;
+            default: break;
+        }
+        free(temp);
+        col++;
     }
-    else if(process==WITHDRAW){
-        userdb[uIdx].curr_amt -= amount;
-        transaction_record(amount, WITHDRAW);
+    return date;
+}
+/*
+    Check total transaction amount per day,and RETURN: 1 if it is less than or equal to max transaction per day, else 0
+*/
+int isTrans_amt_limit_OK(int idx, unsigned int amount){
+    char time_buff[30] = {0};
+    current_time(time_buff, 30); // format [Mar-15-2023-06:52PM]
+    struct Date *curr_date = str_To_StructDate(time_buff);
+    struct Date *hist_date = NULL;
+    for(int i=userdb[idx].tIndex-1; i>=0; i--){
+        hist_date = str_To_StructDate(userdb[idx].record[i].note);
+        if(curr_date->dd == hist_date->dd && curr_date->mm == hist_date->mm && curr_date->yy == hist_date->yy){  
+            amount += get_amount_from_trans(userdb[idx].record[i].note);
+            free(hist_date);
+        }
+        else{
+            free(hist_date);
+            break;
+        }
     }
-    printf("Balance: %u\n", userdb[uIdx].curr_amt);
+    free(curr_date);
+    if(amount <= userdb[idx].transLimit) return 1;
+    else return 0;
+}
+
+void transfer_money(int idxS, int idxR, unsigned int amount){
+    if(isTrans_amt_limit_OK(idxS, amount)){
+        if(isTrans_amt_limit_OK(idxR, amount)){
+            userdb[idxS].curr_amt -= amount;
+            userdb[idxR].curr_amt += amount;
+            transaction_record(amount, TRANSFER_MONEY);
+            printf("Transaction completed\n");
+            printf("Transaction: %s\n", userdb[userFound].record[userdb[userFound].tIndex-1].note);
+            printf("Balance: %u\n", userdb[userFound].curr_amt);
+        }
+        else{
+            printf("Sorry, Recipient's account have reached max transaction amount limit.\nTry it, tomorrow.\n");
+        }
+    }
+    else{
+        printf("Sorry, You have reached your max transaction amount limit.\nTry it, tomorrow.\n");
+    }
+}
+void cashIn_withdraw(int uIdx, unsigned int amount, int process){
+    if(isTrans_amt_limit_OK(uIdx, amount)){
+        if(process==CASH_IN){
+            userdb[uIdx].curr_amt += amount;
+            transaction_record(amount, CASH_IN);
+        }
+        else if(process==WITHDRAW){
+            userdb[uIdx].curr_amt -= amount;
+            transaction_record(amount, WITHDRAW);
+        }
+        printf("Balance: %u\n", userdb[uIdx].curr_amt);
+    }
+    else{
+        printf("Sorry, You have reached your max transaction amount limit.\nTry it, tomorrow.\n");       
+    }
 }
 user_sector(){
     char userIn[30]; 
@@ -172,7 +243,7 @@ user_sector(){
                 printf("Enter an amount to be transferred: ");
                 scanf(" %d", &choice);
                 fflush(stdin);
-                if(choice >= 10){
+                if(choice >= 1000){
                     if(userdb[userFound].curr_amt-1000>=choice) break;
                     else{
                         printf("Insufficient balance\nPress 1 to user_sector or <enter> to re-submit: ");
@@ -525,7 +596,7 @@ void loadingDataFromFile(){
                     case 12: userdb[dbIndex].acc_status = toInt(temp); break;
                     case 13: userdb[dbIndex].loan_status = toInt(temp); break;
                     case 14: userdb[dbIndex].transLimit = toInt(temp); break;
-                    case 15: 
+                    case 15:
                         while((trans=readLine_csv(temp, '|'))){
                             stringCopy(trans, userdb[dbIndex].record[userdb[dbIndex].tIndex].note);
                             userdb[dbIndex].tIndex++;

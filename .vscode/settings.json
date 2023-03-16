@@ -8,6 +8,8 @@
         "*.tcc": "c",
         "type_traits": "c",
         "conio.h": "c",
-        "utils.h": "c"
+        "utils.h": "c",
+        "string.h": "c",
+        "time.h": "c"
     }
 }
