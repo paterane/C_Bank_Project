@@ -233,13 +233,64 @@ float toFloat(char *str){
     return value;
 }
 /*
+    The equivalent char array is returned for given float number.
+*/
+char *ftoChar(float a){
+    int i = 10;
+    int count = 1;
+    int j=0;
+    char *digit = (char*)malloc(11*sizeof(char));
+    int sign = (a<0.0)? 1 : 0;
+    if(sign){
+        digit[0] = '-';
+        a *= -1;
+        count = 2;
+        j = 1;
+    }
+    int d = (int)a;
+    while(1){
+        if(i > d){
+            i /= 10;
+            break;
+        }
+        else{
+            i *= 10;
+            count++;
+        }
+    }
+    for(; j<count; j++){
+        digit[j] = '0' + d/i;
+        d %= i;
+        i /= 10;
+    }
+    digit[j++] = '.';
+    float r = a-(int)a;
+    int f = (int)(r*10000);
+    if((f/10)%10 == 4){
+        f = (f%10 >= 5)? (f/10)+1:f/10;
+        f = (f%10 >= 5)? (f/10)+1:f/10;
+    }
+    else{
+        f = ((f/10)%10 >= 5)? (f/100)+1:f/100;
+    }
+
+    int lap = 10;
+    for(; j<count+3; j++){
+        digit[j] = '0' + f/lap;
+        f %= lap;
+        lap /= 10;
+    }
+    digit[j] = 0;
+    return digit;
+}
+/*
     The equivalent int number is returned if the given string is representing digits or started with digits.
     If not , 0 is returned
 */  
-unsigned int toInt(char *str){
-    int i = 0; int value = 0; int c = 0;
+long toInt(char *str){
+    int i = 0; long value = 0; int c = 0;
     int len = stringLen(str);
-    int digit[len];
+    long digit[len];
     int sign = (str[0]=='-')? 1:0;
     if(sign){
         i = 1;
@@ -266,7 +317,7 @@ unsigned int toInt(char *str){
 /*
     The equivalent char array is returned for given integer number.
 */
-char *toChar(int a){
+char *itoChar(int a){
     int i = 10;
     int count = 1;
     int j=0;
@@ -357,6 +408,7 @@ char month_name[][3] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", 
     Call local time in customized format
     buff: pointer to character capable of holding formatted characters
     RETURN: char pointer
+
 */
 void current_time(char *buff, size_t b_size){
     time_t timer;
@@ -377,8 +429,17 @@ int month_number(char *abbreviated_month){
     }
     return found;
 }
-
-
+/* RETURN: LONG INT of current time if function is called */
+long current_time_L(){
+    time_t timer;
+    time(&timer);
+    return timer;
+}
+/* RETURN: LONG INT of time difference */
+double diff_time_L(long current, long initial){
+    double diff = difftime(current, initial);
+    return diff;
+}
 // Monitoring Moth Abbreviation
 // time_t timer;
 // struct tm *timeInfo = localtime(&timer);
