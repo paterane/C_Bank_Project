@@ -19,3 +19,29 @@ csv format
 1,Peter Oo,12/thalana<N>117395,peteroomm@gmail.com,1234Peter##,1000,09421074860, 500, NO(1)/goland st/NY, 1
 
 id,name,nrc,email,pass,phone,address,curr_amt,income,loan_amt,loan_rate,isPer,acc_status,loan_status,translimit,records,transactions
+
+/* CONSOLE format and STYLING */
+#define RESET "\x1b[0m"
+#define BOLD "\x1b[1m"
+#define FAINT "\x1b[2m"
+#define UNDERLINE "\x1b[4m"
+#define BLINK "\x1b[5m"
+#define INVERSE "\x1b[7m"
+#define RED "\x1b[31m"
+#define TEST "\x03"
+
+#define tab "\x09"
+#define smile "\x01"
+#define invrt_smile "\x02"
+#define heart "\x03"
+#define diamond "\x04"
+#define tree "\x05"
+#define spade "\x06"
+#define arrow_r "\x10"
+#define arrow_l "\x11"
+#define arrow_up_dn "\x12"
+#define arrow_up "\x18"
+#define arrow_dn "\x19"
+#define space "\x20"
+#define v_tab "\x0a"
+/* ************************** */

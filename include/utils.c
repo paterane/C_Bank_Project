@@ -82,7 +82,7 @@ int indexOf(char *str, char *idxStr){
             return -1; // if not found
     }
     else{
-        printf("Index length longer than the string!\n");
+        printf(RED"Index length longer than the string!\n"RESET);
         return -1;
     }
 }
@@ -94,7 +94,7 @@ char *subString(char *str, int idxA, int idxB){
     int length = stringLen(str); int x = 0;
     char *result = (char*)(malloc(length*sizeof(char)));
     if(idxA >= length || idxB > (length+1) || idxA >= idxB){
-        printf("[ERROR!] indexing invalid!!!\n");
+        printf(RED"[ERROR!] indexing invalid!!!\n"RESET);
         return NULL;
     }
     for(int i=idxA; i<idxB; i++){
@@ -111,7 +111,7 @@ int stringCount(char *str, char *idxStr){
     int str_len = stringLen(str);
     int idxStr_len = stringLen(idxStr);
     if(idxStr_len > str_len){
-        printf("[Error!] index > string\n");
+        printf(RED"[Error!] index > string\n"RESET);
         return -1; // if error
     }
     for(;cnt < (str_len+idxStr_len); cnt++){
@@ -377,10 +377,10 @@ int regExpress(char *str, char *pattern){
                 }
             }
             else
-                printf("[-] Found pattern index error!!![pattern excluded]\n");
+                printf(RED"[-] Found pattern index error!!![pattern excluded]\n"RESET);
         }
         else{
-            printf("[-] Found strange patten!!![pattern excluded]\n");
+            printf(RED"[-] Found strange patten!!![pattern excluded]\n"RESET);
         }
         index += 3;
     }
@@ -398,12 +398,36 @@ int regExpress(char *str, char *pattern){
     }
     return 1;
 }
+/*
+    user input function for password,
+    input: char *buffer with n size
+    input characters are returned in buffer
+*/
+void password_input(char *buffer){
+    char ch = 0;
+    int pos = 0;
+    while((ch=getch()) != '\r'){
+        if(ch >= '!' && ch <= '~'){
+            printf("%c", '*');
+            buffer[pos++] = ch;
+        }
+        else if(ch == 8 && pos > 0){ // if ch == backspace
+                printf("\b%c\b", ' ');
+                pos--;
+        }
+        else if(ch == 3){
+            exit(1);
+        }
+    }
+    printf("%c", '\n');
+    buffer[pos] = 0;
+}
 //////////////////////////////////////////////////////////////////////////
 /* ***********************Time Related Functions*********************** */
 //////////////////////////////////////////////////////////////////////////
 
 // Array of Months Abbreviation
-char month_name[][3] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+char month_name[][4] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 /*
     Call local time in customized format
     buff: pointer to character capable of holding formatted characters

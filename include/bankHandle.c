@@ -65,8 +65,10 @@ unsigned int choice = 0;  //General user selection
 void isEmailExisted(char *uEmail){
     uIndex = -1;
     for(int i=0; i<dbIndex; i++){
-        if(stringCmp(uEmail, userdb[i].email))
+        if(stringCmp(uEmail, userdb[i].email)){
             uIndex = i;
+            break;
+        }
     }
 }
 /*
@@ -128,7 +130,7 @@ void transaction_record(unsigned int amount, int process){
         userdb[userFound].tIndex++;
     }
     else if(process == LOAN){
-        printf("LOAN record process not available\n");
+        printf(RED"LOAN record process not available\n"RESET);
     }
 }
 /* Take amount from transaction record and RETRUN as INT */
@@ -197,15 +199,15 @@ void transfer_money(int idxS, int idxR, unsigned int amount){
             service_fee(idxS, amount);
             transaction_record(amount, TRANSFER_MONEY);
             printf("Transaction completed\n");
-            printf("Transaction: %s\n", userdb[userFound].record[userdb[userFound].tIndex-1].note);
-            printf("Balance: %u\n", userdb[userFound].curr_amt);
+            printf("Transaction:"BLUE" %s\n"RESET, userdb[userFound].record[userdb[userFound].tIndex-1].note);
+            printf("Balance:"BLUE" %u\n"RESET, userdb[userFound].curr_amt);
         }
         else{
-            printf("Sorry, Recipient's account have reached max transaction amount limit.\nTry it, tomorrow.\n");
+            printf(RED"Sorry, Recipient's account have reached max transaction amount limit.\nTry it, tomorrow.\n"RESET);
         }
     }
     else{
-        printf("Sorry, You have reached your max transaction amount limit.\nTry it, tomorrow.\n");
+        printf(RED"Sorry, You have reached your max transaction amount limit.\nTry it, tomorrow.\n"RESET);
     }
 }
 void cashIn_withdraw(int uIdx, unsigned int amount, int process){
@@ -219,17 +221,19 @@ void cashIn_withdraw(int uIdx, unsigned int amount, int process){
             service_fee(uIdx, amount);
             transaction_record(amount, WITHDRAW);
         }
-        printf("Balance: %u\n", userdb[uIdx].curr_amt);
+        printf("Balance:"BLUE" %u\n"RESET, userdb[uIdx].curr_amt);
     }
     else{
-        printf("Sorry, You have reached your max transaction amount limit.\nTry it, tomorrow.\n");       
+        printf(RED"Sorry, You have reached your max transaction amount limit.\nTry it, tomorrow.\n"RESET);       
     }
 }
 user_sector(){
-    char userIn[30]; 
-    printf("User name >> %s <<\n", userdb[userFound].name);
+    char userIn[30];
+    printf("User name >>"BLUE" %s "RESET"<<\n", userdb[userFound].name);
     while(1){
-        printf("Transfer,Withdraw,Info,Cash In,Loan,Log,Exit or 1 to main page: ");
+        printf(GREEN"Transfer"RESET","GREEN" Withdraw"RESET","GREEN" Info" \
+                RESET","GREEN" Cash In"RESET","GREEN" Loan"RESET","GREEN" Log" \
+                RESET","GREEN" Exit"RESET" or"GREEN" 1"RESET" to main page: ");
         scanf(" %[^\n]%*c", userIn);
         if(stringCmp(wordLower(userIn), "transfer")){
             while(1){
@@ -238,35 +242,35 @@ user_sector(){
                 isPhoneExisted(userIn);
                 if(uIndex != userFound){
                     if(uIndex == -1){
-                        printf("Received user's phone number not existed\n");
+                        printf(RED"Received user's phone number not existed\n"RESET);
                         printf("Press 1 to user_sector or <enter> to re-submit: ");
                         fgets(userIn, 30, stdin);
                         if(stringCmp(userIn, "1\n")) user_sector();
                     }else break;                    
                 }
                 else{
-                    printf("Sorry you can't transfer to your same account\nPress 1 to user_sector or <enter> to re-submit: ");
+                    printf(RED"Sorry you can't transfer to your same account"RESET"\nPress 1 to user_sector or <enter> to re-submit: ");
                     fgets(userIn, 30, stdin);
                     if(stringCmp(userIn, "1\n")) user_sector();
                 }
             }
             phFound = uIndex;
-            printf("Recipient found: %s\nEmail: %s\n", userdb[phFound].name, userdb[phFound].email);
+            printf("Recipient found:"BLUE" %s\n"RESET"Email:"BLUE" %s\n"RESET, userdb[phFound].name, userdb[phFound].email);
             while(1){
-                printf("Minimum amount allowable to be transferred >> 1000MMK\n");
+                printf(GREEN"Minimum amount allowable to be transferred >> 1000MMK\n"RESET);
                 printf("Enter an amount to be transferred: ");
                 scanf(" %d", &choice);
                 fflush(stdin);
                 if(choice >= 1000){
                     if(userdb[userFound].curr_amt-1000>=choice) break;
                     else{
-                        printf("Insufficient balance\nPress 1 to user_sector or <enter> to re-submit: ");
+                        printf(RED"Insufficient balance"RESET"\nPress 1 to user_sector or <enter> to re-submit: ");
                         fgets(userIn, 30, stdin);
                         if(stringCmp(userIn, "1\n")) user_sector();
                     }
                 }
                 else{
-                    printf("Transferred amount shouldn't be less than 10USD\nPress 1 to user_sector or <enter> to re-submit: ");
+                    printf(RED"Transferred amount shouldn't be less than 10USD"RESET"\nPress 1 to user_sector or <enter> to re-submit: ");
                     fgets(userIn, 30, stdin);
                     if(stringCmp(userIn, "1\n")) user_sector(); 
                 }
@@ -274,10 +278,10 @@ user_sector(){
             int amount_t = choice;
             while(1){
                 printf("Enter password to send: ");
-                scanf(" %[^\n]%*c", userIn);
+                password_input(userIn);
                 if(stringCmp(userIn, userdb[userFound].pass)) break;
                 else{
-                    printf("Wrong credential\nPress 1 to user_sector or <enter> to re-submit: ");
+                    printf(RED"Wrong credential"RESET"\nPress 1 to user_sector or <enter> to re-submit: ");
                     fgets(userIn, 30, stdin);
                     if(stringCmp(userIn, "1\n")) user_sector();
                 }
@@ -286,20 +290,20 @@ user_sector(){
         }
         else if(stringCmp(wordLower(userIn), "withdraw")){
             while(1){
-                printf("Minimum amount allowable to be withdrawn >> 5000MMK\n");
+                printf(GREEN"Minimum amount allowable to be withdrawn >> 5000MMK\n"RESET);
                 printf("Submit amount to be withdrawn: ");
                 scanf(" %d", &choice);
                 fflush(stdin);
                 if(choice >= 5000){
                     if(userdb[userFound].curr_amt-1000 >= choice) break;
                     else{
-                        printf("Insufficient amount in the account\nPress 1 to user_sector or <enter> to re-submit: ");
+                        printf(RED"Insufficient amount in the account"RESET"\nPress 1 to user_sector or <enter> to re-submit: ");
                         fgets(userIn, 30, stdin);
                         if(stringCmp(userIn, "1\n")) user_sector(); 
                     }
                 }
                 else{   
-                    printf("Amount not in the allowable limits\nPress 1 to user_sector or <enter> to re-submit: ");
+                    printf(RED"Amount not in the allowable limits"RESET"\nPress 1 to user_sector or <enter> to re-submit: ");
                     fgets(userIn, 30, stdin);
                     if(stringCmp(userIn, "1\n")) user_sector();            
                 }
@@ -308,24 +312,27 @@ user_sector(){
 
         }
         else if(stringCmp(wordLower(userIn), "info")){
-            printf("Name: %s\nNRC: %s\nEmail: %s\nPhone: %s\nAddress: %s\nBalance: %uMMK\n", userdb[userFound].name, userdb[userFound].nrc,
-                                                            userdb[userFound].email, userdb[userFound].phone,
-                                                            userdb[userFound].address, userdb[userFound].curr_amt);
-            printf("Income: %uMMK\nloan amount:%uMMK\n[Acc_Type: %s]\t[Acc_Status: %s]\t[Loan_Status: %s]\n", userdb[userFound].income,
-                                                    userdb[userFound].loan_amt,
+            printf("Name: "BLUE"%s\n"RESET"NRC: "L_BLUE"%s\n"RESET"Email: "BLUE \ 
+                    "%s\n"RESET"Phone: "L_BLUE"%s\n"RESET"Address: "BLUE"%s\n"RESET \
+                    "Balance: "L_BLUE"%uMMK\n"RESET, userdb[userFound].name, userdb[userFound].nrc,
+                                                     userdb[userFound].email, userdb[userFound].phone,
+                                                     userdb[userFound].address, userdb[userFound].curr_amt);
+            printf("Income: "BLUE"%uMMK\n"RESET"loan amount: "L_BLUE"%uMMK\n"RESET \
+                    "[Acc_Type: "BLUE"%s"RESET"]\t[Acc_Status: "BLUE"%s"RESET \ 
+                    "]\t[Loan_Status: "BLUE"%s"RESET"]\n", userdb[userFound].income, userdb[userFound].loan_amt,
                                                     (userdb[userFound].isPer)? "Personal":"Business",
                                                     (userdb[userFound].acc_status)? "Active":"Suspended",
                                                     (userdb[userFound].loan_status)? "Burrowed":"Clear");
         }
         else if(stringCmp(wordLower(userIn), "cash in")){
             while(1){
-                printf("Minimum amount allowable to be submitted >> 5000MMK\n");
+                printf(GREEN"Minimum amount allowable to be submitted >> 5000MMK\n"RESET);
                 printf("Please insert CASH in the slot: ");
                 scanf(" %d", &choice);
                 fflush(stdin);
                 if(choice >= 5000) break;
                 else{
-                    printf("Amount not in the allowable limits\nPress 1 to user_sector or <enter> to re-submit: ");
+                    printf(RED"Amount not in the allowable limits"RESET"\nPress 1 to user_sector or <enter> to re-submit: ");
                     fgets(userIn, 30, stdin);
                     if(stringCmp(userIn, "1\n")) user_sector();
                 }
@@ -334,7 +341,7 @@ user_sector(){
         }
         else if(stringCmp(wordLower(userIn), "log")){               
             for(int i=0; i<userdb[userFound].tIndex; i++){
-                printf("%d) %s\n", i+1, userdb[userFound].record[i].note);
+                printf(BLUE"%d"RESET") "L_BLUE"%s\n"RESET, i+1, userdb[userFound].record[i].note);
             }
         }
         else if(stringCmp(wordLower(userIn), "loan")) printf("Loan unavailable\n");
@@ -347,7 +354,7 @@ void login_section(){
     char uEmail[50];
     char uPass[50];
     long curr_time = current_time_L();
-    printf("LOGIN SECTOR\n");
+    printf(YELLOW"LOGIN SECTOR\n"RESET);
     printf("Email: ");
     scanf(" %[^\n]%*c", uEmail);
     isEmailExisted(uEmail);
@@ -357,19 +364,19 @@ void login_section(){
             userdb[uIndex].lock_time = curr_time;
         }
         if(diff_time_L(curr_time, userdb[uIndex].lock_time) <= 300.0){
-            printf("Account locked temporarily\nTry another\n");
+            printf(RED"Account locked temporarily\nTry another\n"RESET);
             funcCall(login_section, "login_section");
         }
         printf("Password: ");
-        scanf(" %[^\n]%*c", uPass);
+        password_input(uPass);
         if(!stringCmp(uPass, userdb[uIndex].pass)){
             userdb[uIndex].p_count++;
-            printf("Password incorrect!\n");
+            printf(RED"Password incorrect!\n"RESET);
             funcCall(login_section, "login_section");
         }
     }
     else{
-        printf("Email doesn't exist!\n");
+        printf(RED"Email doesn't exist!\n"RESET);
         funcCall(login_section, "login_section");
     }
     userFound = uIndex;
@@ -388,11 +395,11 @@ int isMailValid(char *email, char *r_pattern){ // Format: xxxx@[A-Za-z0-9].com
     if(emailName == NULL)
         return 0;
     if(!regExpress(emailName, "a-z0-9.-.")){
-        printf("An email shouldn't contain any special or upper case characters.\n");
+        printf(RED"An email shouldn't contain any special or upper case characters.\n"RESET);
         return 0;
     }
     if(stringCount(emailName, ".") >= 2){
-        printf("An email shouldn't contain \".\" more than once in user name!!\n");
+        printf(RED"An email shouldn't contain \".\" more than once in user name!!\n"RESET);
         return 0;
     }
     if(email[indexB+4] != '\0')
@@ -465,12 +472,12 @@ void mail_form(){
             scanf(" %[^\n]%*c", userdb[dbIndex].name);
         }
         else{
-            printf("Email already existed\n");
+            printf(RED"Email already existed\n"RESET);
             funcCall(mail_form, "mail_form");
         }
     }
     else{
-        printf("Email format not valid\n");
+        printf(RED"Email format not valid\n"RESET);
         funcCall(mail_form, "mail_form");
     }
 }
@@ -480,29 +487,29 @@ void nrc_form(){
     if(isNRCValid(userdb[dbIndex].nrc)){
         isNRCExisted(userdb[dbIndex].nrc);
         if(uIndex != -1){
-            printf("NRC already existed\n");
+            printf(RED"NRC already existed\n"RESET);
             funcCall(nrc_form, "nrc_form");
         }
     }
     else{
-        printf("NRC format not valid\n");
+        printf(RED"NRC format not valid\n"RESET);
         funcCall(nrc_form, "nrc_form");
     }
 }
 void pass_form(){
     char confirmPass[20];
     printf("Password >>\n[not less than 12 chars including at least one Capital and number and special]: ");
-    scanf(" %[^\n]%*c", userdb[dbIndex].pass);
+    password_input(userdb[dbIndex].pass);
     if(isPassValid(userdb[dbIndex].pass)){
         printf("Re-type password: ");
-        scanf(" %[^\n]%*c", confirmPass);
+        password_input(confirmPass);
         if(!stringCmp(userdb[dbIndex].pass, confirmPass)){
-            printf("Password not matched\n");
+            printf(RED"Password not matched\n"RESET);
             funcCall(pass_form, "pass_form");
         }
     }
     else{
-        printf("Password format invalid or weak password\n");
+        printf(RED"Password format invalid or weak password\n"RESET);
         funcCall(pass_form, "pass_form");
     }
 }
@@ -524,18 +531,18 @@ void phone_form(){
     if(isPhoneValid(userdb[dbIndex].phone)){
         isPhoneExisted(userdb[dbIndex].phone);
         if(uIndex != -1){
-            printf("Phone number already existed\n");
+            printf(RED"Phone number already existed\n"RESET);
             funcCall(phone_form, "phone_form");
         }
     }
     else {
-        printf("Phone number not valid\n");
+        printf(RED"Phone number not valid\n"RESET);
         funcCall(phone_form, "phone_form");
     }
 }
 
 void registration(){
-    printf("USER REGISTRATION\n");
+    printf(YELLOW"USER REGISTRATION\n"RESET);
     mail_form();
     nrc_form();
     pass_form();
@@ -569,14 +576,14 @@ void registration(){
 }
 void welcome(){
     char userIn[30];
-    printf("Welcome to ebanking service\n");
+    printf(YELLOW"Welcome to ebanking service\n"RESET);
     while(1){
-        printf("[login, register or exit]: ");
+        printf("["GREEN"login"RESET","GREEN" register"RESET" or"GREEN" exit"RESET"]: ");
         scanf(" %[^\n]%*c", userIn);
         if(stringCmp(wordLower(userIn), "login")) login_section();
         else if(stringCmp(wordLower(userIn), "register")) registration();
         else if(stringCmp(wordLower(userIn), "exit")) exitProgram();
-        else printf("[!]Wrong Input\n");
+        else printf(RED"[!]Wrong Input\n"RESET);
     }
 }
 /*
@@ -598,7 +605,7 @@ void exitProgram(){
 }
 // id,name,nrc,email,pass,phone,address,curr_amt,income,loan_amt,loan_rate,isPer,acc_status,loan_status,translimit,records,transactions
 void loadingDataFromFile(){
-    printf("Loading data from file...\n");
+    printf(B_GROUND PURPLE"Loading data from file...\n"RESET);
     FILE *fp = NULL;
     char buffer[10000]; // note 100 * record 100
     fp = fopen("data.csv", "r");
@@ -643,19 +650,10 @@ void loadingDataFromFile(){
         fclose(fp);
     }
     else
-        printf("[!]Loading database Failed.\n");
-}
-void printAllData(){
-    for(int i=0; i<dbIndex; i++){
-        printf("%u, %s, %s, %s, %s\n%s, %s, %u, %u, %u\n%.2f, %d, %d, %d, %d\n", userdb[i].id, userdb[i].name, userdb[i].nrc, 
-                                                                        userdb[i].email, userdb[i].pass, userdb[i].phone,
-                                                                        userdb[i].address, userdb[i].curr_amt, userdb[i].income,
-                                                                        userdb[i].loan_amt, userdb[i].loan_rate, userdb[i].isPer,
-                                                                        userdb[i].acc_status, userdb[i].loan_status, userdb[i].transLimit);
-    }
+        printf(RED"[!]Loading database Failed.\n"RESET);
 }
 void saveAllData(){
-    printf("Saving Data...\n");
+    printf(PURPLE"Saving Data...\n"RESET);
     FILE *fp = fopen("data.csv", "w");
     if(fp != NULL){
         for(int i=0; i<dbIndex; i++){
@@ -672,10 +670,10 @@ void saveAllData(){
             }
             fprintf(fp, "%c", '\n');
         }
-        printf("Data saved...\n");
+        printf(PURPLE"Data saved...\n"G_RESET);
         if(fp != NULL)
             fclose(fp);
     }
     else
-        printf("File opening Failed\n");
+        printf(RED"File opening Failed\n"RESET);
 }

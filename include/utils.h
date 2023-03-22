@@ -2,8 +2,27 @@
 // Created by Peter Oo on 03/11/2023
 //
 
-#ifndef INCLUDE_UTILS_H
-#define INCLUDE_UTILS_H
+#ifndef BANK_PROJECT_UTILS_H
+#define BANK_PROJECT_UTILS_H
+
+#define G_RESET "\x1b[0m"
+#define RESET "\x1b[37m"
+#define BOLD "\x1b[1m"
+#define PALE "\x1b[2m"
+#define ITALIC "\x1b[3m"
+#define UNDERLINE "\x1b[4m"
+#define D_UNDERLINE "\x1b[1m"
+#define INVERTED "\x1b[7m"
+//#define CLEAR_TEXT "\x1b[8m"
+#define STRIKETHROUGH "\x1b[9m"
+#define GREY "\x1b[30m"
+#define RED "\x1b[31m"
+#define GREEN "\x1b[32m"
+#define YELLOW "\x1b[33m"
+#define BLUE "\x1b[34m"
+#define PURPLE "\x1b[35m"
+#define L_BLUE "\x1b[36m"
+#define B_GROUND "\x1b[40m"
 
 char *wordLower(char *word);
 int stringLen(const char *str);
@@ -24,5 +43,7 @@ void current_time(char *buff, size_t b_size);
 int month_number(char *abbreviated_month);
 long current_time_L();
 double diff_time_L(long current, long initial);
+int getch();
+void password_input(char *buffer);
 
 #endif // INCLUDE_UTILS_H

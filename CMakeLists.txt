@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.0)
-project(Online_Banking)
+project(BANK_PROJECT)
 # C standard
 set(CMAKE_C_STANDARD 11)
 # executable output directory
