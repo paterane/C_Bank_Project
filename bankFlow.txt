@@ -20,28 +20,24 @@ csv format
 
 id,name,nrc,email,pass,phone,address,curr_amt,income,loan_amt,loan_rate,isPer,acc_status,loan_status,translimit,records,transactions
 
-/* CONSOLE format and STYLING */
-#define RESET "\x1b[0m"
-#define BOLD "\x1b[1m"
-#define FAINT "\x1b[2m"
-#define UNDERLINE "\x1b[4m"
-#define BLINK "\x1b[5m"
-#define INVERSE "\x1b[7m"
-#define RED "\x1b[31m"
-#define TEST "\x03"
+INACTIVITY of 30 days triggers account to be suspended.
 
-#define tab "\x09"
-#define smile "\x01"
-#define invrt_smile "\x02"
-#define heart "\x03"
-#define diamond "\x04"
-#define tree "\x05"
-#define spade "\x06"
-#define arrow_r "\x10"
-#define arrow_l "\x11"
-#define arrow_up_dn "\x12"
-#define arrow_up "\x18"
-#define arrow_dn "\x19"
-#define space "\x20"
-#define v_tab "\x0a"
-/* ************************** */
+## LOAN ##
+
+			__Factors__
+__Processing_Fee__
+>> 5000 MMK
+__Eligibility__
+>> Salary at least 400,000 MMK and above
+>> At least 3 days of account status
+Benefits
+>> Amount up to 2 times of monthly salary 
+>> repayment method ( 30 days options [rates 20%])
+
+Calculation:
+	loan: 1,000,000
+	rate: 200,000
+	total: 1,200,000
+	perDay: 40,000
+	Days: 30 days
+IF can't repay within that range account will be suspended.

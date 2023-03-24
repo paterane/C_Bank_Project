@@ -10,15 +10,8 @@
 #define TRANSFER_MONEY 0
 #define CASH_IN        1
 #define WITHDRAW       2
-#define LOAN           3
-/* dd-mm-yy info structure*/
-struct Date{
-    int dd;
-    int mm;
-    int yy;
-    int H;
-    int M;
-};
+#define BURROW         3
+#define REPAY          4
 /* User transaction */
 struct Transaction{
     char note[100];
@@ -35,13 +28,14 @@ typedef struct{
     unsigned int curr_amt; // current amount in the account
     unsigned int income;   // User's monthly income
     unsigned int loan_amt; // amount burrowed from bank
-    float loan_rate; // interest
+    unsigned int loan_rate; // interest
     unsigned int isPer: 1; // Personal or business account
-    // unsigned int acc_lvl: 2; // 0 low, 1 normal, 2 special
     unsigned int acc_status: 1; // 1 for active, 0 for suspended
     unsigned int loan_status: 1; // 1 for burrowed, 0 for loan clear
     unsigned int p_count: 2; // counter for wrong password or email per user
-    long lock_time; // buffer to store initial seconds of acc_lock
+    long lock_time; // time of account lock
+    struct Date start; // Date of account creating
+    long active; // time of account login
     unsigned int transLimit; //transaction amount limit per day
     struct Transaction record[100]; // transaction records per user
     int tIndex; //transaction index
@@ -100,10 +94,11 @@ void isPhoneExisted(char *ph){
 */
 void transaction_record(unsigned int amount, int process){
     char time_buff[30] = {'\0'};
-    current_time(time_buff, 30); 
+    current_time(time_buff, 30);
+    char *newTrans = itoChar(amount);
     if(process == TRANSFER_MONEY){
-        char *sender = itoChar(amount);
-        char *recipient = itoChar(amount);
+        char *sender = newTrans;
+        char *recipient = newTrans;
         stringConcat(&sender, "MMK transferred to ");
         stringConcat(&sender, userdb[phFound].name);
         stringConcat(&sender, time_buff);
@@ -116,21 +111,28 @@ void transaction_record(unsigned int amount, int process){
         userdb[phFound].tIndex++;
     }
     else if(process == CASH_IN){
-        char *newTrans = itoChar(amount);
         stringConcat(&newTrans, "MMK saved in the account");
         stringConcat(&newTrans, time_buff);
         stringCopy(newTrans, userdb[userFound].record[userdb[userFound].tIndex].note);
         userdb[userFound].tIndex++;
     }
     else if(process == WITHDRAW){
-        char *newTrans = itoChar(amount);
         stringConcat(&newTrans, "MMK withdrawn from the account");
         stringConcat(&newTrans, time_buff);
         stringCopy(newTrans, userdb[userFound].record[userdb[userFound].tIndex].note);
         userdb[userFound].tIndex++;
     }
-    else if(process == LOAN){
-        printf(RED"LOAN record process not available\n"RESET);
+    else if(process == BURROW){
+        stringConcat(&newTrans, "MMK burrowed from the bank");
+        stringConcat(&newTrans, time_buff);
+        stringCopy(newTrans, userdb[userFound].record[userdb[userFound].tIndex].note);
+        userdb[userFound].tIndex++;
+    }
+    else if(process == REPAY){
+        stringConcat(&newTrans, "MMK repaid to the bank");
+        stringConcat(&newTrans, time_buff);
+        stringCopy(newTrans, userdb[userFound].record[userdb[userFound].tIndex].note);
+        userdb[userFound].tIndex++;
     }
 }
 /* Take amount from transaction record and RETRUN as INT */
@@ -138,30 +140,6 @@ int get_amount_from_trans(char *transact){
     char *temp = subString(transact, 0, indexOf(transact, "MMK"));
     int amount = toInt(temp);
     return amount;
-}
-/* Transform [mm-dd-yy-H:M] format to struct Date format to be arithmetically operated */
-struct Date *str_To_StructDate(char *strDate){
-    char time[10];
-    int start = indexOf(strDate, "[");
-    int end = indexOf(strDate, "]");
-    strDate = subString(strDate, start+1, end);
-    struct Date *date = (struct Date*)malloc(sizeof(struct Date));
-    int col = 0;
-    char *temp = NULL;
-    while((temp=readLine_csv(strDate, '-'))){
-        switch(col){
-            case 0: date->mm = month_number(temp); break;
-            case 1: date->dd = toInt(temp); break;
-            case 2: date->yy = toInt(temp); break;
-            case 3: stringCopy(temp, time); break;
-            default: break;
-        }
-        free(temp);
-        col++;
-    } //12:20PM
-    date->H = (time[5] == 'P')? toInt(subString(time, 0, 2))+12 : toInt(subString(time, 0, 2));
-    date->M = toInt(subString(time, 3, 5));
-    return date;
 }
 /*
     Check total transaction amount per day,and RETURN: 1 if it is less than or equal to max transaction per day, else 0
@@ -198,9 +176,8 @@ void transfer_money(int idxS, int idxR, unsigned int amount){
             userdb[idxR].curr_amt += amount;
             service_fee(idxS, amount);
             transaction_record(amount, TRANSFER_MONEY);
-            printf("Transaction completed\n");
-            printf("Transaction:"BLUE" %s\n"RESET, userdb[userFound].record[userdb[userFound].tIndex-1].note);
-            printf("Balance:"BLUE" %u\n"RESET, userdb[userFound].curr_amt);
+            printf("Transaction:"BLUE" %s\n"RESET, userdb[idxS].record[userdb[idxS].tIndex-1].note);
+            printf("Balance:"BLUE" %u mmk\n"RESET, userdb[idxS].curr_amt);
         }
         else{
             printf(RED"Sorry, Recipient's account have reached max transaction amount limit.\nTry it, tomorrow.\n"RESET);
@@ -221,10 +198,65 @@ void cashIn_withdraw(int uIdx, unsigned int amount, int process){
             service_fee(uIdx, amount);
             transaction_record(amount, WITHDRAW);
         }
-        printf("Balance:"BLUE" %u\n"RESET, userdb[uIdx].curr_amt);
+        printf("Transaction:"BLUE" %s\n"RESET, userdb[uIdx].record[userdb[uIdx].tIndex-1].note);
+        printf("Balance:"BLUE" %u mmk\n"RESET, userdb[uIdx].curr_amt);
     }
     else{
         printf(RED"Sorry, You have reached your max transaction amount limit.\nTry it, tomorrow.\n"RESET);       
+    }
+}
+/*
+    RETURN INDEX OF TRANSACTION NOTE of a given user if given string index is found or -1
+*/
+int trans_note_index(int uIdx, char *strIdx){
+    int idx=0;
+    for(idx=userdb[uIdx].tIndex-1; idx>=0; idx--){
+        int index = indexOf(userdb[uIdx].record[idx].note, strIdx);
+        if(index != -1) break;
+    }
+    return idx;
+}
+/*
+    RETURN: days left for loan repayment, if exceed, negative numbers are returned.
+*/
+int days_left(int uIdx){
+    long curr_time = current_time_L();
+    int i = trans_note_index(uIdx, "burrow");
+    struct Date *time_info = str_To_StructDate(userdb[uIdx].record[i].note);
+    long due_time = timeStruct_to_L(time_info) + 2592000; // 30 days (30*24*60*60)
+    long time_left = diff_time_L(due_time, curr_time);
+    return time_left / 86400;
+}
+void burrow_repay(int uIdx, unsigned int amount, int process){
+    if(process == BURROW){
+        int process_fee = 5000;
+        userdb[uIdx].loan_amt = amount;
+        userdb[uIdx].loan_rate = amount * 0.3;
+        userdb[uIdx].curr_amt += userdb[uIdx].loan_amt - process_fee;
+        userdb[uIdx].loan_amt += userdb[uIdx].loan_rate;
+        userdb[uIdx].loan_status = 1;            // mark loan status as active
+        transaction_record(amount, BURROW);
+        printf("Transaction:"BLUE" %s\n"RESET, userdb[uIdx].record[userdb[uIdx].tIndex-1].note);
+        printf("Balance:"BLUE" %u mmk"RESET"\nLoan amount: "L_BLUE"%u mmk"RESET \
+                "\nLoan interest: "BLUE"%u mmk"RESET"\n", userdb[uIdx].curr_amt, userdb[uIdx].loan_amt - userdb[uIdx].loan_rate, 
+                                                        userdb[uIdx].loan_rate);
+    }
+    else if(process == REPAY){
+        if(amount < userdb[uIdx].loan_amt){
+            userdb[uIdx].loan_amt -= amount;
+            userdb[uIdx].curr_amt -= amount;
+            transaction_record(amount, REPAY);
+            printf("transaction: "BLUE"%s"RESET"\n", userdb[uIdx].record[userdb[uIdx].tIndex-1].note);
+        }
+        else{
+            userdb[uIdx].curr_amt -= amount;
+            userdb[uIdx].curr_amt +=  amount - userdb[uIdx].loan_amt;
+            transaction_record(userdb[uIdx].loan_amt, REPAY);
+            printf("transaction: "BLUE"%s"RESET"\n", userdb[uIdx].record[userdb[uIdx].tIndex-1].note);
+            userdb[uIdx].loan_status = 0;
+            userdb[uIdx].loan_amt = 0;
+            userdb[uIdx].loan_rate = 0;
+        }
     }
 }
 user_sector(){
@@ -317,11 +349,14 @@ user_sector(){
                     "Balance: "L_BLUE"%uMMK\n"RESET, userdb[userFound].name, userdb[userFound].nrc,
                                                      userdb[userFound].email, userdb[userFound].phone,
                                                      userdb[userFound].address, userdb[userFound].curr_amt);
-            printf("Income: "BLUE"%uMMK\n"RESET"loan amount: "L_BLUE"%uMMK\n"RESET \
-                    "[Acc_Type: "BLUE"%s"RESET"]\t[Acc_Status: "BLUE"%s"RESET \ 
-                    "]\t[Loan_Status: "BLUE"%s"RESET"]\n", userdb[userFound].income, userdb[userFound].loan_amt,
-                                                    (userdb[userFound].isPer)? "Personal":"Business",
-                                                    (userdb[userFound].acc_status)? "Active":"Suspended",
+            unsigned int loan_amt = 0;
+            if(userdb[userFound].loan_status == 1){
+                int i= trans_note_index(userFound, "burrow");
+                loan_amt = get_amount_from_trans(userdb[userFound].record[i].note);
+            }
+            printf("Income: "BLUE"%uMMK\n"RESET"Burrowed amount: "L_BLUE"%uMMK\n"RESET"loan interest: "BLUE"%uMMK\n"RESET \
+                    "[Acc_Type: "BLUE"%s"RESET"]\t[Loan_Status: "BLUE"%s"RESET"]\n", userdb[userFound].income, loan_amt,
+                                                    userdb[userFound].loan_rate,(userdb[userFound].isPer)? "Personal":"Business",
                                                     (userdb[userFound].loan_status)? "Burrowed":"Clear");
         }
         else if(stringCmp(wordLower(userIn), "cash in")){
@@ -344,7 +379,53 @@ user_sector(){
                 printf(BLUE"%d"RESET") "L_BLUE"%s\n"RESET, i+1, userdb[userFound].record[i].note);
             }
         }
-        else if(stringCmp(wordLower(userIn), "loan")) printf("Loan unavailable\n");
+        else if(stringCmp(wordLower(userIn), "loan")){
+            if(userdb[uIndex].loan_status == 1){
+                int time_left = days_left(userFound);
+                printf("Loan amount left to be repaid: "BLUE"%u mmk"RESET"\n", userdb[userFound].loan_amt);
+                if(time_left < 0) printf("Loan overdue\nContact to HO\n time overdue:"RED" %d day%c"RESET, (-1)*time_left,
+                                                                                                ((-1)*time_left > 1)? 's':' ');
+                else printf("Time left to repay:"BLUE" %d day%c"RESET"\n", time_left, (time_left > 1)? 's':' ');
+            }
+            else    printf("Loan Status Clear\nWould you like to get some loan...?\n");
+            printf("Press 1 to user_sector or <enter> to continue: ");
+            fgets(userIn, 30, stdin);
+            if(stringCmp(userIn, "1\n")) user_sector();
+            if(userdb[userFound].loan_status == 0 && userdb[userFound].income >= 400000 && userdb[userFound].curr_amt >= 200000){
+                while(1){
+                    printf("Enter an amount to be burrowed: ");
+                    scanf(" %d", &choice);
+                    fflush(stdin);
+                    if(choice <= 2*userdb[userFound].income && choice >= 400000)
+                        break;
+                    else{
+                        printf(RED"Your max loan amount is limited to double of income, and\nmini loan amount at least 400,000"RESET \
+                                "\nPress 1 to user_sector or <enter> to re-submit: ");
+                        fgets(userIn, 30, stdin);
+                        if(stringCmp(userIn, "1\n")) user_sector();
+                    }
+                }
+                burrow_repay(userFound, choice, BURROW);
+            }
+            else{
+                if(userdb[userFound].income < 400000){
+                    printf(RED"Sorry, you can't get loan as your salary is lower than 400,000MMK"RESET"\n");
+                    user_sector();
+                }
+                else if(userdb[userFound].curr_amt < 200000){
+                    printf(RED"Sorry, you can't get loan since money in the account is lower than 200,000MMK"RESET"\n");
+                    user_sector();
+                }
+                printf("Enter an amount to be repaid for loan: ");
+                scanf(" %d", &choice);
+                fflush(stdin);
+                int ii = trans_note_index(userFound, "burrow");
+                unsigned int monthly_repay = (get_amount_from_trans(userdb[userFound].record[ii].note)+userdb[userFound].loan_rate) / 30;
+                if(userdb[uIndex].curr_amt - 1000 >= choice && choice >= monthly_repay)
+                    burrow_repay(userFound, choice, REPAY);
+                else printf(RED"Sorry, insufficient balance or repaid amount should not less than monthly repay amount"RESET"\n");
+            }
+        }
         else if(stringCmp(wordLower(userIn), "exit")) exitProgram();
         else if(stringCmp(userIn, "1")) welcome();
     }
@@ -359,12 +440,14 @@ void login_section(){
     scanf(" %[^\n]%*c", uEmail);
     isEmailExisted(uEmail);
     if(uIndex != -1){
+        if(diff_time_L(curr_time, userdb[uIndex].active) >= 7776000.0) userdb[uIndex].acc_status = 0;
         if(userdb[uIndex].p_count >= 3){
             userdb[uIndex].p_count = 0;
             userdb[uIndex].lock_time = curr_time;
         }
-        if(diff_time_L(curr_time, userdb[uIndex].lock_time) <= 300.0){
-            printf(RED"Account locked temporarily\nTry another\n"RESET);
+        if(diff_time_L(curr_time, userdb[uIndex].lock_time) <= 300.0 || userdb[uIndex].acc_status == 0){
+            if(userdb[uIndex].acc_status == 0) printf(RED"Account suspended due to inactive status, contact to HO"RESET"\n");
+            else printf(RED"Account locked temporarily\nTry another"RESET"\n");
             funcCall(login_section, "login_section");
         }
         printf("Password: ");
@@ -380,7 +463,8 @@ void login_section(){
         funcCall(login_section, "login_section");
     }
     userFound = uIndex;
-    userdb[uIndex].p_count = 0;
+    userdb[userFound].p_count = 0;
+    userdb[userFound].active = current_time_L();
     user_sector();
 }
 /*
@@ -542,6 +626,9 @@ void phone_form(){
 }
 
 void registration(){
+    char time_buff[30];
+    current_time(time_buff, 30);
+    struct Date *current_time = str_To_StructDate(time_buff);
     printf(YELLOW"USER REGISTRATION\n"RESET);
     mail_form();
     nrc_form();
@@ -554,15 +641,19 @@ void registration(){
     scanf(" %d", &userdb[dbIndex].income);
     fflush(stdin);
     userdb[dbIndex].loan_amt = 0;               // default loan clear
-    userdb[dbIndex].loan_rate = 0.3;            // bank's default loan interest
+    userdb[dbIndex].loan_rate = 0;            // default loan rate
     printf("account-type[1 for Personal or 0 for business]: ");
     scanf(" %d", &choice);
     fflush(stdin);
     userdb[dbIndex].isPer = choice;
     userdb[dbIndex].acc_status = 1;                                       // default account active
     userdb[dbIndex].loan_status = 0;                                      // default loan status clear
-    userdb[dbIndex].p_count = 0;                             
-    userdb[dbIndex].lock_time = 0;
+    userdb[dbIndex].p_count = 0;                                          // wrong password count
+    userdb[dbIndex].start.yy = current_time->yy;                          // Account created year
+    userdb[dbIndex].start.mm = current_time->mm;                          // Account created month
+    userdb[dbIndex].start.dd = current_time->dd;                          // Account created day
+    userdb[dbIndex].active = current_time_L();                            // current login time                   
+    userdb[dbIndex].lock_time = 0;                                        // password lock time
     if(userdb[dbIndex].isPer == 1)  userdb[dbIndex].transLimit = 1000000; // 1,000,000 MMK per day
     else    userdb[dbIndex].transLimit = 10000000;                        // 10,000,000 MMK per day
     userdb[dbIndex].id = dbIndex + 1;                                     // last index number is next id number
@@ -626,14 +717,18 @@ void loadingDataFromFile(){
                     case 7: userdb[dbIndex].curr_amt = toInt(temp); break;
                     case 8: userdb[dbIndex].income = toInt(temp); break;
                     case 9: userdb[dbIndex].loan_amt = toInt(temp); break;
-                    case 10: userdb[dbIndex].loan_rate = toFloat(temp); break;
+                    case 10: userdb[dbIndex].loan_rate = toInt(temp); break;
                     case 11: userdb[dbIndex].isPer = toInt(temp); break;
                     case 12: userdb[dbIndex].acc_status = toInt(temp); break;
                     case 13: userdb[dbIndex].loan_status = toInt(temp); break;
-                    case 14: userdb[dbIndex].p_count = toInt(temp); break;
-                    case 15: userdb[dbIndex].lock_time = toInt(temp); break;
-                    case 16: userdb[dbIndex].transLimit = toInt(temp); break;
-                    case 17:
+                    case 14: userdb[dbIndex].p_count = toInt(temp); break;  
+                    case 15: userdb[dbIndex].start.yy = toInt(temp); break;  
+                    case 16: userdb[dbIndex].start.mm = toInt(temp); break;
+                    case 17: userdb[dbIndex].start.dd = toInt(temp); break;
+                    case 18: userdb[dbIndex].active = toInt(temp); break;    
+                    case 19: userdb[dbIndex].lock_time = toInt(temp); break;
+                    case 20: userdb[dbIndex].transLimit = toInt(temp); break;
+                    case 21:
                         while((trans=readLine_csv(temp, '|'))){
                             stringCopy(trans, userdb[dbIndex].record[userdb[dbIndex].tIndex].note);
                             userdb[dbIndex].tIndex++;
@@ -642,7 +737,7 @@ void loadingDataFromFile(){
                     break;
                 }
                 free(temp);
-                if(col>=17) break;
+                if(col>=21) break;
                 col++;
             }
             dbIndex++;
@@ -656,13 +751,15 @@ void saveAllData(){
     printf(PURPLE"Saving Data...\n"RESET);
     FILE *fp = fopen("data.csv", "w");
     if(fp != NULL){
-        for(int i=0; i<dbIndex; i++){
-            fprintf(fp, "%u,%s,%s,%s,\"%s\",%s,\"%s\",%u,%u,%u,%.2f,%u,%u,%u,%u,%ld,%u", userdb[i].id, userdb[i].name, userdb[i].nrc,
-                                                                            userdb[i].email, userdb[i].pass, userdb[i].phone,
-                                                                            userdb[i].address, userdb[i].curr_amt, userdb[i].income,
-                                                                            userdb[i].loan_amt, userdb[i].loan_rate, userdb[i].isPer,
-                                                                            userdb[i].acc_status, userdb[i].loan_status, 
-                                                                            userdb[i].p_count,userdb[i].lock_time, userdb[i].transLimit);
+        for(int i=0; i<dbIndex; i++){                 //,yy,mm,dd,active
+            fprintf(fp, "%u,%s,%s,%s,\"%s\",%s,\"%s\",%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%ld,%ld,%u", userdb[i].id, userdb[i].name, 
+                                                                            userdb[i].nrc, userdb[i].email, userdb[i].pass, 
+                                                                            userdb[i].phone, userdb[i].address, userdb[i].curr_amt, 
+                                                                            userdb[i].income, userdb[i].loan_amt, userdb[i].loan_rate, 
+                                                                            userdb[i].isPer, userdb[i].acc_status, userdb[i].loan_status, 
+                                                                            userdb[i].p_count, userdb[i].start.yy, userdb[i].start.mm,
+                                                                            userdb[i].start.dd, userdb[i].active, userdb[i].lock_time, 
+                                                                            userdb[i].transLimit);
             if(userdb[i].tIndex > 0) fprintf(fp, "%c", ',');
             for(int j=0; j<userdb[i].tIndex; j++){
                 fprintf(fp, "%s", userdb[i].record[j].note);

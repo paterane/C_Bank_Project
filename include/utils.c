@@ -440,6 +440,44 @@ void current_time(char *buff, size_t b_size){
     struct tm *timeInfo = localtime(&timer);
     strftime(buff, b_size, "[%b-%d-%Y-%I:%M%p]", timeInfo); //[MM-DD-YY-H:M]
 }
+/* Transform [mm-dd-yy-H:M] format to struct Date format to be arithmetically operated */
+struct Date *str_To_StructDate(char *strDate){
+    char time[10];
+    int start = indexOf(strDate, "[");
+    int end = indexOf(strDate, "]");
+    strDate = subString(strDate, start+1, end);
+    struct Date *date = (struct Date*)malloc(sizeof(struct Date));
+    int col = 0;
+    char *temp = NULL;
+    while((temp=readLine_csv(strDate, '-'))){
+        switch(col){
+            case 0: date->mm = month_number(temp); break;
+            case 1: date->dd = toInt(temp); break;
+            case 2: date->yy = toInt(temp); break;
+            case 3: stringCopy(temp, time); break;
+            default: break;
+        }
+        free(temp);
+        col++;
+    } //12:20PM
+    date->H = (time[5] == 'P')? toInt(subString(time, 0, 2))+12 : toInt(subString(time, 0, 2));
+    date->M = toInt(subString(time, 3, 5));
+    return date;
+}
+/*
+    Convert time structure to machine readable long int form
+*/
+long timeStruct_to_L(struct Date *timeInfo){
+    struct tm *timeData;
+    time_t rawtime;
+    time(&rawtime);
+    timeData = localtime(&rawtime);
+    timeData->tm_year = timeInfo->yy - 1900;
+    timeData->tm_mon = timeInfo->mm;
+    timeData->tm_mday = timeInfo->dd;
+    time_t timer = mktime(timeData);
+    return timer;
+}
 /*
     RETURN : decimal number of a given Abbreviated Month, if not found, RETURN: -1
 */
@@ -460,8 +498,8 @@ long current_time_L(){
     return timer;
 }
 /* RETURN: LONG INT of time difference */
-double diff_time_L(long current, long initial){
-    double diff = difftime(current, initial);
+double diff_time_L(long end, long begin){
+    double diff = difftime(end, begin);
     return diff;
 }
 // Monitoring Moth Abbreviation

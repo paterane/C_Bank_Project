@@ -5,6 +5,15 @@
 #ifndef BANK_PROJECT_UTILS_H
 #define BANK_PROJECT_UTILS_H
 
+/* dd-mm-yy info structure*/
+struct Date{
+    int dd;
+    int mm;
+    int yy;
+    int H;
+    int M;
+};
+
 #define G_RESET "\x1b[0m"
 #define RESET "\x1b[37m"
 #define BOLD "\x1b[1m"
@@ -40,9 +49,11 @@ char *itoChar(int a);
 int isNum(char *str);
 int regExpress(char *str, char *pattern);
 void current_time(char *buff, size_t b_size);
+struct Date *str_To_StructDate(char *strDate);
 int month_number(char *abbreviated_month);
 long current_time_L();
-double diff_time_L(long current, long initial);
+double diff_time_L(long end, long begin);
+long timeStruct_to_L(struct Date *timeInfo);
 int getch();
 void password_input(char *buffer);
 
