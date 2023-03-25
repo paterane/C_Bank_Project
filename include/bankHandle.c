@@ -49,6 +49,7 @@ int userFound = -1; //General userIndex that can be used if the index is to be r
 int phFound = -1; //General userIndex that can be used if the index is to be returned
 int nrcFound = -1; //General userIndex that can be used if the index is to be returned
 unsigned int choice = 0;  //General user selection
+char trans_indexes[100] = {-1}; // Special array for storing transaction indexes of paticular keyword found trans_notes
 
 /***************************************************************************************/
 //////////////////////////////////Bank Functions/////////////////////////////////////////
@@ -206,23 +207,26 @@ void cashIn_withdraw(int uIdx, unsigned int amount, int process){
     }
 }
 /*
-    RETURN INDEX OF TRANSACTION NOTE of a given user if given string index is found or -1
+    RETURN char ARRAY ended by -1 OF INDEXES OF TRANSACTION NOTES of a given user if keyword looking for is found or arrary of -1 is 
+    returned.
 */
-int trans_note_index(int uIdx, char *strIdx){
+void trans_note_index(int uIdx, char *strIdx){
     int idx=0;
-    for(idx=userdb[uIdx].tIndex-1; idx>=0; idx--){
+    int j = 0;
+    for(int i=0; i<100; i++) trans_indexes[i] = -1; // clear array's content
+    for(idx=userdb[uIdx].tIndex-1; idx>=0; idx--){ // Searching from latest
         int index = indexOf(userdb[uIdx].record[idx].note, strIdx);
-        if(index != -1) break;
+        if(index != -1) trans_indexes[j++] = idx;
     }
-    return idx;
+    trans_indexes[j] = -1;
 }
 /*
     RETURN: days left for loan repayment, if exceed, negative numbers are returned.
 */
 int days_left(int uIdx){
     long curr_time = current_time_L();
-    int i = trans_note_index(uIdx, "burrow");
-    struct Date *time_info = str_To_StructDate(userdb[uIdx].record[i].note);
+    trans_note_index(uIdx, "burrow"); // you will get index found at trans_indexes array
+    struct Date *time_info = str_To_StructDate(userdb[uIdx].record[trans_indexes[0]].note);
     long due_time = timeStruct_to_L(time_info) + 2592000; // 30 days (30*24*60*60)
     long time_left = diff_time_L(due_time, curr_time);
     return time_left / 86400;
@@ -351,8 +355,8 @@ user_sector(){
                                                      userdb[userFound].address, userdb[userFound].curr_amt);
             unsigned int loan_amt = 0;
             if(userdb[userFound].loan_status == 1){
-                int i= trans_note_index(userFound, "burrow");
-                loan_amt = get_amount_from_trans(userdb[userFound].record[i].note);
+                trans_note_index(userFound, "burrow");
+                loan_amt = get_amount_from_trans(userdb[userFound].record[trans_indexes[0]].note);
             }
             printf("Income: "BLUE"%uMMK\n"RESET"Burrowed amount: "L_BLUE"%uMMK\n"RESET"loan interest: "BLUE"%uMMK\n"RESET \
                     "[Acc_Type: "BLUE"%s"RESET"]\t[Loan_Status: "BLUE"%s"RESET"]\n", userdb[userFound].income, loan_amt,
@@ -390,7 +394,7 @@ user_sector(){
             else    printf("Loan Status Clear\nWould you like to get some loan...?\n");
             printf("Press 1 to user_sector or <enter> to continue: ");
             fgets(userIn, 30, stdin);
-            if(stringCmp(userIn, "1\n")) user_sector();
+            if(stringCmp(userIn, "1\n")) user_sector();                                     // change it later with admin approval
             if(userdb[userFound].loan_status == 0 && userdb[userFound].income >= 400000 && userdb[userFound].curr_amt >= 200000){
                 while(1){
                     printf("Enter an amount to be burrowed: ");
@@ -416,14 +420,24 @@ user_sector(){
                     printf(RED"Sorry, you can't get loan since money in the account is lower than 200,000MMK"RESET"\n");
                     user_sector();
                 }
-                printf("Enter an amount to be repaid for loan: ");
-                scanf(" %d", &choice);
-                fflush(stdin);
-                int ii = trans_note_index(userFound, "burrow");
-                unsigned int monthly_repay = (get_amount_from_trans(userdb[userFound].record[ii].note)+userdb[userFound].loan_rate) / 30;
-                if(userdb[uIndex].curr_amt - 1000 >= choice && choice >= monthly_repay)
-                    burrow_repay(userFound, choice, REPAY);
-                else printf(RED"Sorry, insufficient balance or repaid amount should not less than monthly repay amount"RESET"\n");
+                while(1){
+                    printf("Enter an amount to be repaid for loan: ");
+                    scanf(" %d", &choice);
+                    fflush(stdin);
+                    trans_note_index(userFound, "burrow");
+                    int a = trans_indexes[0];
+                    unsigned int monthly_repay = (get_amount_from_trans(userdb[userFound].record[a].note)+userdb[userFound].loan_rate) / 30;
+                    if(userdb[uIndex].curr_amt - 1000 >= choice && choice >= monthly_repay){
+                        burrow_repay(userFound, choice, REPAY);
+                        break;
+                    }
+                    else{
+                        printf(RED"Sorry, insufficient balance or repaid amount should not less than monthly repay amount: %u mmk"RESET \
+                                    "\nPress 1 to user_sector or <enter> to re-submit: ", monthly_repay);
+                        fgets(userIn, 30, stdin);
+                        if(stringCmp(userIn, "1\n")) user_sector();
+                    }
+                }
             }
         }
         else if(stringCmp(wordLower(userIn), "exit")) exitProgram();
