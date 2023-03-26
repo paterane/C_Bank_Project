@@ -108,12 +108,12 @@ CMakeFiles/bank.dir/clean:
 CMakeFiles/bnkfunc.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\bnkfunc.dir\build.make CMakeFiles/bnkfunc.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\bnkfunc.dir\build.make CMakeFiles/bnkfunc.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=D:\CClass\NCC_CLASS\Bank_Project\build\CMakeFiles --progress-num=3,4,5 "Built target bnkfunc"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=D:\CClass\NCC_CLASS\Bank_Project\build\CMakeFiles --progress-num=3,4,5,6 "Built target bnkfunc"
 .PHONY : CMakeFiles/bnkfunc.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/bnkfunc.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start D:\CClass\NCC_CLASS\Bank_Project\build\CMakeFiles 3
+	$(CMAKE_COMMAND) -E cmake_progress_start D:\CClass\NCC_CLASS\Bank_Project\build\CMakeFiles 4
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 CMakeFiles/bnkfunc.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start D:\CClass\NCC_CLASS\Bank_Project\build\CMakeFiles 0
 .PHONY : CMakeFiles/bnkfunc.dir/rule

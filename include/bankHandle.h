@@ -7,6 +7,5 @@
 
 void welcome();
 void loadingDataFromFile();
-void saveAllData();
 
 #endif //DIPLEVEL1_ZOOM_ONLINE_BANK_H

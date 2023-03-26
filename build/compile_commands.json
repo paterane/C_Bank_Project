@@ -16,5 +16,11 @@
   "command": "C:\\MinGW\\bin\\gcc.exe   -g -std=gnu11 -o CMakeFiles\\bnkfunc.dir\\include\\utils.c.obj -c D:\\CClass\\NCC_CLASS\\Bank_Project\\include\\utils.c",
   "file": "D:/CClass/NCC_CLASS/Bank_Project/include/utils.c",
   "output": "CMakeFiles/bnkfunc.dir/include/utils.c.obj"
+},
+{
+  "directory": "D:/CClass/NCC_CLASS/Bank_Project/build",
+  "command": "C:\\MinGW\\bin\\gcc.exe   -g -std=gnu11 -o CMakeFiles\\bnkfunc.dir\\include\\encrypt_decrypt.c.obj -c D:\\CClass\\NCC_CLASS\\Bank_Project\\include\\encrypt_decrypt.c",
+  "file": "D:/CClass/NCC_CLASS/Bank_Project/include/encrypt_decrypt.c",
+  "output": "CMakeFiles/bnkfunc.dir/include/encrypt_decrypt.c.obj"
 }
 ]

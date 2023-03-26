@@ -11,7 +11,7 @@ add_executable(bank main.c)
 target_include_directories(bank PUBLIC include)
 # handling library
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/lib)
-add_library(bnkfunc STATIC include/bankHandle.c include/utils.c)
+add_library(bnkfunc STATIC include/bankHandle.c include/utils.c include/encrypt_decrypt.c)
 find_library(BNK bnkfunc lib)
 target_link_libraries(bank PUBLIC ${BNK})
 

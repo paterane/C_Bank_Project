@@ -165,6 +165,30 @@ include/bankHandle.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\bnkfunc.dir\build.make CMakeFiles/bnkfunc.dir/include/bankHandle.c.s
 .PHONY : include/bankHandle.c.s
 
+include/encrypt_decrypt.obj: include/encrypt_decrypt.c.obj
+.PHONY : include/encrypt_decrypt.obj
+
+# target to build an object file
+include/encrypt_decrypt.c.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\bnkfunc.dir\build.make CMakeFiles/bnkfunc.dir/include/encrypt_decrypt.c.obj
+.PHONY : include/encrypt_decrypt.c.obj
+
+include/encrypt_decrypt.i: include/encrypt_decrypt.c.i
+.PHONY : include/encrypt_decrypt.i
+
+# target to preprocess a source file
+include/encrypt_decrypt.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\bnkfunc.dir\build.make CMakeFiles/bnkfunc.dir/include/encrypt_decrypt.c.i
+.PHONY : include/encrypt_decrypt.c.i
+
+include/encrypt_decrypt.s: include/encrypt_decrypt.c.s
+.PHONY : include/encrypt_decrypt.s
+
+# target to generate assembly for a file
+include/encrypt_decrypt.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\bnkfunc.dir\build.make CMakeFiles/bnkfunc.dir/include/encrypt_decrypt.c.s
+.PHONY : include/encrypt_decrypt.c.s
+
 include/utils.obj: include/utils.c.obj
 .PHONY : include/utils.obj
 
@@ -226,6 +250,9 @@ help:
 	@echo ... include/bankHandle.obj
 	@echo ... include/bankHandle.i
 	@echo ... include/bankHandle.s
+	@echo ... include/encrypt_decrypt.obj
+	@echo ... include/encrypt_decrypt.i
+	@echo ... include/encrypt_decrypt.s
 	@echo ... include/utils.obj
 	@echo ... include/utils.i
 	@echo ... include/utils.s

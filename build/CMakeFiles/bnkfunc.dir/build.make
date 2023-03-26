@@ -96,19 +96,35 @@ CMakeFiles/bnkfunc.dir/include/utils.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/bnkfunc.dir/include/utils.c.s"
 	C:\MinGW\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S D:\CClass\NCC_CLASS\Bank_Project\include\utils.c -o CMakeFiles\bnkfunc.dir\include\utils.c.s
 
+CMakeFiles/bnkfunc.dir/include/encrypt_decrypt.c.obj: CMakeFiles/bnkfunc.dir/flags.make
+CMakeFiles/bnkfunc.dir/include/encrypt_decrypt.c.obj: D:/CClass/NCC_CLASS/Bank_Project/include/encrypt_decrypt.c
+CMakeFiles/bnkfunc.dir/include/encrypt_decrypt.c.obj: CMakeFiles/bnkfunc.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=D:\CClass\NCC_CLASS\Bank_Project\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building C object CMakeFiles/bnkfunc.dir/include/encrypt_decrypt.c.obj"
+	C:\MinGW\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/bnkfunc.dir/include/encrypt_decrypt.c.obj -MF CMakeFiles\bnkfunc.dir\include\encrypt_decrypt.c.obj.d -o CMakeFiles\bnkfunc.dir\include\encrypt_decrypt.c.obj -c D:\CClass\NCC_CLASS\Bank_Project\include\encrypt_decrypt.c
+
+CMakeFiles/bnkfunc.dir/include/encrypt_decrypt.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/bnkfunc.dir/include/encrypt_decrypt.c.i"
+	C:\MinGW\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E D:\CClass\NCC_CLASS\Bank_Project\include\encrypt_decrypt.c > CMakeFiles\bnkfunc.dir\include\encrypt_decrypt.c.i
+
+CMakeFiles/bnkfunc.dir/include/encrypt_decrypt.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/bnkfunc.dir/include/encrypt_decrypt.c.s"
+	C:\MinGW\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S D:\CClass\NCC_CLASS\Bank_Project\include\encrypt_decrypt.c -o CMakeFiles\bnkfunc.dir\include\encrypt_decrypt.c.s
+
 # Object files for target bnkfunc
 bnkfunc_OBJECTS = \
 "CMakeFiles/bnkfunc.dir/include/bankHandle.c.obj" \
-"CMakeFiles/bnkfunc.dir/include/utils.c.obj"
+"CMakeFiles/bnkfunc.dir/include/utils.c.obj" \
+"CMakeFiles/bnkfunc.dir/include/encrypt_decrypt.c.obj"
 
 # External object files for target bnkfunc
 bnkfunc_EXTERNAL_OBJECTS =
 
 D:/CClass/NCC_CLASS/Bank_Project/lib/libbnkfunc.a: CMakeFiles/bnkfunc.dir/include/bankHandle.c.obj
 D:/CClass/NCC_CLASS/Bank_Project/lib/libbnkfunc.a: CMakeFiles/bnkfunc.dir/include/utils.c.obj
+D:/CClass/NCC_CLASS/Bank_Project/lib/libbnkfunc.a: CMakeFiles/bnkfunc.dir/include/encrypt_decrypt.c.obj
 D:/CClass/NCC_CLASS/Bank_Project/lib/libbnkfunc.a: CMakeFiles/bnkfunc.dir/build.make
 D:/CClass/NCC_CLASS/Bank_Project/lib/libbnkfunc.a: CMakeFiles/bnkfunc.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=D:\CClass\NCC_CLASS\Bank_Project\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking C static library D:\CClass\NCC_CLASS\Bank_Project\lib\libbnkfunc.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=D:\CClass\NCC_CLASS\Bank_Project\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking C static library D:\CClass\NCC_CLASS\Bank_Project\lib\libbnkfunc.a"
 	$(CMAKE_COMMAND) -P CMakeFiles\bnkfunc.dir\cmake_clean_target.cmake
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles\bnkfunc.dir\link.txt --verbose=$(VERBOSE)
 

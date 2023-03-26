@@ -1,26 +1,31 @@
-Id >> id
-Name >> name
-NRC >> nrc
-Email >> email
-Password >> pass
-Personal or Business >> isPer
-Loan_status >> loan_status
-Monthly_income >> income
-Loan_amount >> loan_amt
-Loan_rate >> loan_rate
-AccountStatus >> acc_status
-Account_Level >> acc_level
-PhNumber >> phone
-Current_amount >> curr_amt
-Address >> address
-Transaction Record >> transRC 
-
 csv format
-1,Peter Oo,12/thalana<N>117395,peteroomm@gmail.com,1234Peter##,1000,09421074860, 500, NO(1)/goland st/NY, 1
+x,xxx,xx,xxxx,"xxx",xxx|xxx
 
-id,name,nrc,email,pass,phone,address,curr_amt,income,loan_amt,loan_rate,isPer,acc_status,loan_status,translimit,records,transactions
+id,
+name,
+nrc,
+email,
+pass,
+phone,
+address,
+curr_amt, 		//current amount in the account
+income,
+loan_amt,       //burrowed amount from the bank
+loan_rate,      //Total interest
+isPer,			// Is personal or business
+acc_status,		// 1 for active 0 for suspended
+loan_status,	// 1 for burrowed 0 for clear
+p_count,		// wrong password count: 3 account locked
+lock_time,		// Initial lock time of account
+start,			// account created date
+active,			// account active time record
+translimit,     // transaction amount limit
+records,	    // transaction notes records
+tIndex			// transaction index
 
-INACTIVITY of 30 days triggers account to be suspended.
+NOTE: Program below is only testing purpose, finally all the time and date duaration
+shall be modified as necessary.
+INACTIVITY of 90 days triggers account to be suspended.
 
 ## LOAN ##
 
@@ -32,7 +37,7 @@ __Eligibility__
 >> At least 3 days of account status
 Benefits
 >> Amount up to 2 times of monthly salary 
->> repayment method ( 30 days options [rates 20%])
+>> repayment method ( 30 days options [rates 30%])
 
 Calculation:
 	loan: 1,000,000
@@ -40,4 +45,3 @@ Calculation:
 	total: 1,200,000
 	perDay: 40,000
 	Days: 30 days
-IF can't repay within that range account will be suspended.
