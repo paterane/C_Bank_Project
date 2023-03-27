@@ -30,6 +30,7 @@ typedef struct{
     unsigned int income;   // User's monthly income
     unsigned int loan_amt; // amount burrowed from bank
     unsigned int loan_rate; // interest
+    unsigned int isAdmin: 1; // 1 for admin 0 for user only one admin occur at a time
     unsigned int isPer: 1; // Personal or business account
     unsigned int acc_status: 1; // 1 for active, 0 for suspended
     unsigned int loan_status: 1; // 1 for burrowed, 0 for loan clear
@@ -90,6 +91,13 @@ void isPhoneExisted(char *ph){
             break;
         }
     }
+}
+/*
+    function check whether there is an admin or not if exited, return 1 else 0
+*/
+int isAdminExisted(){
+    if(dbIndex >= 1) return 1;
+    else return 0;
 }
 /*
     xxx USD your process string[MM-DD-YY H:M]
@@ -229,8 +237,8 @@ int days_left(int uIdx){
     trans_note_index(uIdx, "burrow"); // you will get index found at trans_indexes array
     struct Date *time_info = str_To_StructDate(userdb[uIdx].record[trans_indexes[0]].note);
     long due_time = timeStruct_to_L(time_info) + 2592000; // 30 days (30*24*60*60)
-    long time_left = diff_time_L(due_time, curr_time);
-    return time_left / 86400;
+    double time_left = diff_time_L(due_time, curr_time);
+    return time_left / 86400.0;
 }
 void burrow_repay(int uIdx, unsigned int amount, int process){
     if(process == BURROW){
@@ -271,7 +279,8 @@ user_sector(){
     while(1){
         printf(GREEN"Transfer"RESET","GREEN" Withdraw"RESET","GREEN" Info" \
                 RESET","GREEN" Cash In"RESET","GREEN" Loan"RESET","GREEN" Log" \
-                RESET","GREEN" Exit"RESET" or"GREEN" 1"RESET" to main page: ");
+                RESET","YELLOW" %s"RESET"%s"GREEN"Exit"RESET" or"GREEN" 1"RESET" to main page: ",
+                    (userdb[userFound].isAdmin)? "admin" : "", (userdb[userFound].isAdmin)? ", " : "");
         scanf(" %[^\n]%*c", userIn);
         if(stringCmp(wordLower(userIn), "transfer")){
             while(1){
@@ -357,9 +366,11 @@ user_sector(){
         else if(stringCmp(wordLower(userIn), "info")){
             printf("%-20s: "BLUE"%s\n"RESET"%-20s: "L_BLUE"%s\n"RESET"%-20s: "BLUE \ 
                     "%s\n"RESET"%-20s: "L_BLUE"%s\n"RESET"%-20s: "BLUE"%s\n"RESET \
-                    "%-20s: "L_BLUE"%uMMK\n"RESET, "Name", userdb[userFound].name, "NRC", userdb[userFound].nrc,
-                                                     "Email", userdb[userFound].email, "Phone", userdb[userFound].phone,
-                                                     "Address", userdb[userFound].address, "Balance", userdb[userFound].curr_amt);
+                    "%-20s: "L_BLUE"%uMMK\n"RESET"%-20s:"BLUE" %d/%d/%d"RESET"\n", "Name", userdb[userFound].name, "NRC", 
+                                                    userdb[userFound].nrc, "Email", userdb[userFound].email, 
+                                                    "Phone", userdb[userFound].phone, "Address", userdb[userFound].address, 
+                                                    "Balance", userdb[userFound].curr_amt, "Created on", userdb[userFound].start.dd,
+                                                    userdb[userFound].start.mm+1, userdb[userFound].start.yy);
             unsigned int loan_amt = 0;
             if(userdb[userFound].loan_status == 1){
                 trans_note_index(userFound, "burrow");
@@ -403,8 +414,11 @@ user_sector(){
             else    printf(GREEN"Loan Status Clear\nWould you like to get some loan...?\n"RESET);
             printf("Press "BLUE"1"RESET" to user_sector or"BLUE" <enter>"RESET" to continue: ");
             fgets(userIn, 30, stdin);
-            if(stringCmp(userIn, "1\n")) user_sector();                                     // change it later with admin approval
-            if(userdb[userFound].loan_status == 0 && userdb[userFound].income >= 400000 && userdb[userFound].curr_amt >= 200000){
+            if(stringCmp(userIn, "1\n")) user_sector();
+            long start_time = timeStruct_to_L(&userdb[userFound].start);
+            long curr_time = current_time_L();
+            double acc_exist_time = diff_time_L(curr_time, start_time);                                        // 3 days
+            if(userdb[userFound].loan_status == 0 && userdb[userFound].income >= 400000 && acc_exist_time >= 259200.0){ //In progress
                 while(1){
                     printf("Enter an amount to be burrowed: ");
                     scanf(" %d", &choice);
@@ -425,8 +439,8 @@ user_sector(){
                     printf(RED"Sorry, you can't get loan as your salary is lower than 400,000MMK"RESET"\n");
                     user_sector();
                 }
-                else if(userdb[userFound].curr_amt < 200000){
-                    printf(RED"Sorry, you can't get loan since money in the account is lower than 200,000MMK"RESET"\n");
+                else if(acc_exist_time < 259200.0){
+                    printf(RED"Sorry, you can get loan only when your account existance is more than 3 days"RESET"\n");
                     user_sector();
                 }
                 while(1){
@@ -449,6 +463,83 @@ user_sector(){
                 }
             }
         }
+        else if(stringCmp(wordLower(userIn), "admin")){
+            while(1){
+                printf(BLUE"show user"RESET" ,"BLUE"change admin"RESET" ,"BLUE"manage"RESET" or "BLUE"exit"RESET" to user_sector: ");
+                scanf(" %[^\n]%*c", userIn);
+                if(stringCmp(wordLower(userIn), "show user")){
+                    for(int i=0; i<dbIndex; i++){
+                        printf("%-20s:"BLUE" %s"RESET"\n%-20s:"BLUE" %s"RESET \
+                                "\n%-20s:"BLUE" %s"RESET"\n\n", "User", userdb[i].name, "Email", userdb[i].email,
+                                                        "Password", userdb[i].pass);
+                    }
+                    printf("Press"BLUE" 1"RESET" to user_sector or"BLUE" <enter>"RESET" to admin: ");
+                    fgets(userIn, 30, stdin);
+                    if(stringCmp(userIn, "1\n")) user_sector();
+                }
+                else if(stringCmp(wordLower(userIn), "change admin")){
+                    printf(GREEN"Change the Admin account"RESET"\n");
+                    while(1){
+                        printf("%-15s: ", "Enter Email");
+                        scanf(" %[^\n]%*c", userIn);
+                        isEmailExisted(userIn);
+                        if(uIndex != -1 && uIndex != userFound){
+                            printf("Are you sure to pass to"BLUE" %s"RESET" [Yes|No][No]: ");
+                            fgets(userIn, 30, stdin);
+                            if(stringCmp(wordLower(userIn), "yes\n")){
+                                userdb[userFound].isAdmin = 0;
+                                userdb[uIndex].isAdmin = 1;
+                                printf(GREEN"Admin position has been successfully passed to %s\n"RESET, userdb[uIndex].name);
+                                user_sector();
+                            }
+                            else printf("You are still"BLUE" Admin"RESET"\n");
+                            break;
+                        }
+                        else{
+                            printf(RED"Email not found\n"RESET"Press"BLUE" 1"RESET" to admin or"BLUE" <enter>"RESET" to re-submit: ");
+                            fgets(userIn, 30, stdin);
+                            if(stringCmp(userIn, "1\n")) break;
+                        }
+                    }
+                }
+                else if(stringCmp(wordLower(userIn), "manage")){
+                    printf(GREEN"Admin can suspend an account or unlock from suspension\n"RESET);
+                    while(1){
+                        printf("%-15s: ", "Enter Email");
+                        scanf(" %[^\n]%*c", userIn);
+                        isEmailExisted(userIn);
+                        if(uIndex != -1 && uIndex != userFound){
+                            printf("This account, %s, is "BLUE"%s\n"RESET, userdb[uIndex].email, 
+                                                                            (userdb[uIndex].acc_status)? "active":"suspended");
+                            if(userdb[uIndex].acc_status){
+                                printf("Would you like to lock the account?[Yes|No][No]: ");
+                                fgets(userIn, 30, stdin);
+                                if(stringCmp(wordLower(userIn), "yes\n")){
+                                    userdb[uIndex].acc_status = 0;
+                                    printf("The account has been locked successfully\n");
+                                }
+                            }
+                            else{
+                                printf("Would you like to unlock the account?[Yes|No][No]: ");
+                                fgets(userIn, 30, stdin);
+                                if(stringCmp(wordLower(userIn), "yes\n")){
+                                    userdb[uIndex].acc_status = 1;
+                                    printf("The account has been unlocked successfully\n");
+                                }                              
+                            }
+                            break;
+                        }
+                        else{
+                            printf(RED"Email not found\n"RESET"Press"BLUE" 1"RESET" to admin or"BLUE" <enter>"RESET" to re-submit: ");
+                            fgets(userIn, 30, stdin);
+                            if(stringCmp(userIn, "1\n")) break;
+                        }
+                    }
+                }
+                else if(stringCmp(wordLower(userIn), "exit")) user_sector();
+            }
+
+        }
         else if(stringCmp(wordLower(userIn), "exit")) exitProgram();
         else if(stringCmp(userIn, "1")) welcome();
     }
@@ -469,7 +560,7 @@ void login_section(){
             userdb[uIndex].lock_time = curr_time;
         }
         if(diff_time_L(curr_time, userdb[uIndex].lock_time) <= 300.0 || userdb[uIndex].acc_status == 0){
-            if(userdb[uIndex].acc_status == 0) printf(RED"Account suspended due to inactive status, contact to HO"RESET"\n");
+            if(userdb[uIndex].acc_status == 0) printf(RED"Account suspended due to inactive status or admin locked, contact to HO"RESET"\n");
             else printf(RED"Account locked temporarily\nTry another"RESET"\n");
             funcCall(login_section, "login_section");
         }
@@ -669,6 +760,8 @@ void registration(){
     scanf(" %d", &choice);
     fflush(stdin);
     userdb[dbIndex].isPer = choice;
+    if(!isAdminExisted()) userdb[dbIndex].isAdmin = 1;                    //make you admin
+    else userdb[dbIndex].isAdmin = 0;                                     //make you user. Ask admin if want to be captain
     userdb[dbIndex].acc_status = 1;                                       // default account active
     userdb[dbIndex].loan_status = 0;                                      // default loan status clear
     userdb[dbIndex].p_count = 0;                                          // wrong password count
@@ -743,17 +836,18 @@ void loadingDataFromFile(){
                     case 8: userdb[dbIndex].income = toInt(temp); break;
                     case 9: userdb[dbIndex].loan_amt = toInt(temp); break;
                     case 10: userdb[dbIndex].loan_rate = toInt(temp); break;
-                    case 11: userdb[dbIndex].isPer = toInt(temp); break;
-                    case 12: userdb[dbIndex].acc_status = toInt(temp); break;
-                    case 13: userdb[dbIndex].loan_status = toInt(temp); break;
-                    case 14: userdb[dbIndex].p_count = toInt(temp); break;  
-                    case 15: userdb[dbIndex].start.yy = toInt(temp); break;  
-                    case 16: userdb[dbIndex].start.mm = toInt(temp); break;
-                    case 17: userdb[dbIndex].start.dd = toInt(temp); break;
-                    case 18: userdb[dbIndex].active = toInt(temp); break;    
-                    case 19: userdb[dbIndex].lock_time = toInt(temp); break;
-                    case 20: userdb[dbIndex].transLimit = toInt(temp); break;
-                    case 21:
+                    case 11: userdb[dbIndex].isAdmin = toInt(temp); break;
+                    case 12: userdb[dbIndex].isPer = toInt(temp); break;
+                    case 13: userdb[dbIndex].acc_status = toInt(temp); break;
+                    case 14: userdb[dbIndex].loan_status = toInt(temp); break;
+                    case 15: userdb[dbIndex].p_count = toInt(temp); break;  
+                    case 16: userdb[dbIndex].start.yy = toInt(temp); break;  
+                    case 17: userdb[dbIndex].start.mm = toInt(temp); break;
+                    case 18: userdb[dbIndex].start.dd = toInt(temp); break;
+                    case 19: userdb[dbIndex].active = toInt(temp); break;    
+                    case 20: userdb[dbIndex].lock_time = toInt(temp); break;
+                    case 21: userdb[dbIndex].transLimit = toInt(temp); break;
+                    case 22:
                         while((trans=readLine_csv(temp, '|'))){
                             stringCopy(trans, userdb[dbIndex].record[userdb[dbIndex].tIndex].note);
                             userdb[dbIndex].tIndex++;
@@ -762,7 +856,7 @@ void loadingDataFromFile(){
                     break;
                 }
                 free(temp);
-                if(col>=21) break;
+                if(col>=22) break;
                 col++;
             }
             dbIndex++;
@@ -777,14 +871,14 @@ void saveAllData(){
     FILE *fp = fopen("data.csv", "w");
     if(fp != NULL){
         for(int i=0; i<dbIndex; i++){                 //,yy,mm,dd,active
-            fprintf(fp, "%u,%s,%s,%s,\"%s\",%s,\"%s\",%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%ld,%ld,%u", userdb[i].id, userdb[i].name, 
+            fprintf(fp, "%u,%s,%s,%s,\"%s\",%s,\"%s\",%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%ld,%ld,%u", userdb[i].id, userdb[i].name, 
                                                                             userdb[i].nrc, userdb[i].email, userdb[i].pass, 
-                                                                            userdb[i].phone, userdb[i].address, userdb[i].curr_amt, 
+                                                                            userdb[i].phone, userdb[i].address, userdb[i].curr_amt,
                                                                             userdb[i].income, userdb[i].loan_amt, userdb[i].loan_rate, 
-                                                                            userdb[i].isPer, userdb[i].acc_status, userdb[i].loan_status, 
-                                                                            userdb[i].p_count, userdb[i].start.yy, userdb[i].start.mm,
-                                                                            userdb[i].start.dd, userdb[i].active, userdb[i].lock_time, 
-                                                                            userdb[i].transLimit);
+                                                                            userdb[i].isAdmin, userdb[i].isPer, userdb[i].acc_status, 
+                                                                            userdb[i].loan_status, userdb[i].p_count, userdb[i].start.yy, 
+                                                                            userdb[i].start.mm, userdb[i].start.dd, userdb[i].active, 
+                                                                            userdb[i].lock_time, userdb[i].transLimit);
             if(userdb[i].tIndex > 0) fprintf(fp, "%c", ',');
             for(int j=0; j<userdb[i].tIndex; j++){
                 fprintf(fp, "%s", userdb[i].record[j].note);

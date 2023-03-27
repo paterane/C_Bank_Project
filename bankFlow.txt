@@ -12,13 +12,14 @@ curr_amt, 		//current amount in the account
 income,
 loan_amt,       //burrowed amount from the bank
 loan_rate,      //Total interest
+isAdmin,        // 1 for admin 0 for user only one admin occur at a time
 isPer,			// Is personal or business
 acc_status,		// 1 for active 0 for suspended
 loan_status,	// 1 for burrowed 0 for clear
 p_count,		// wrong password count: 3 account locked
-lock_time,		// Initial lock time of account
 start,			// account created date
 active,			// account active time record
+lock_time,		// Initial lock time of account
 translimit,     // transaction amount limit
 records,	    // transaction notes records
 tIndex			// transaction index
