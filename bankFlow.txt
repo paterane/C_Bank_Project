@@ -28,6 +28,8 @@ NOTE: Program below is only testing purpose, finally all the time and date duara
 shall be modified as necessary.
 INACTIVITY of 90 days triggers account to be suspended.
 
+
+
 ## LOAN ##
 
 			__Factors__
@@ -46,3 +48,11 @@ Calculation:
 	total: 1,200,000
 	perDay: 40,000
 	Days: 30 days
+
+
+
+bugs issues:
+03/29/2023 >>
+	LINE 322: found description error >> fixed from 10USD to 1000 MMK
+	LINE 407: found using uIndex      >> fixed from uIndex to userFound (big issue)
+	LINE 466: found admin works for other user >> fixed adding condition statement "isAdmin" in condition

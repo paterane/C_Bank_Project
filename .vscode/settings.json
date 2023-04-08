@@ -10,6 +10,7 @@
         "conio.h": "c",
         "utils.h": "c",
         "string.h": "c",
-        "time.h": "c"
+        "time.h": "c",
+        "encrypt_decrypt.h": "c"
     }
 }

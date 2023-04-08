@@ -13,6 +13,7 @@
 #define WITHDRAW       2
 #define BURROW         3
 #define REPAY          4
+
 /* User transaction */
 struct Transaction{
     char note[100];
@@ -319,7 +320,7 @@ user_sector(){
                     }
                 }
                 else{
-                    printf(RED"Transferred amount shouldn't be less than 10USD"RESET \
+                    printf(RED"Transferred amount shouldn't be less than 1000 mmk"RESET \
                             "\nPress"BLUE" 1"RESET" to user_sector or"BLUE" <enter>"RESET" to re-submit: ");
                     fgets(userIn, 30, stdin);
                     if(stringCmp(userIn, "1\n")) user_sector(); 
@@ -404,7 +405,7 @@ user_sector(){
             }
         }
         else if(stringCmp(wordLower(userIn), "loan")){
-            if(userdb[uIndex].loan_status == 1){
+            if(userdb[userFound].loan_status == 1){
                 int time_left = days_left(userFound);
                 printf("%-30s: "BLUE"%u mmk"RESET"\n", "Loan amount left to be repaid", userdb[userFound].loan_amt);
                 if(time_left < 0) printf("Loan overdue\nContact to HO\n%-30s:"RED" %d day%c"RESET, "time overdue", (-1)*time_left,
@@ -463,14 +464,15 @@ user_sector(){
                 }
             }
         }
-        else if(stringCmp(wordLower(userIn), "admin")){
+        else if(stringCmp(wordLower(userIn), "admin") && userdb[userFound].isAdmin){
             while(1){
                 printf(BLUE"show user"RESET" ,"BLUE"change admin"RESET" ,"BLUE"manage"RESET" or "BLUE"exit"RESET" to user_sector: ");
                 scanf(" %[^\n]%*c", userIn);
                 if(stringCmp(wordLower(userIn), "show user")){
                     for(int i=0; i<dbIndex; i++){
-                        printf("%-20s:"BLUE" %s"RESET"\n%-20s:"BLUE" %s"RESET \
-                                "\n%-20s:"BLUE" %s"RESET"\n\n", "User", userdb[i].name, "Email", userdb[i].email,
+                        printf("%-20s:"BLUE" %s"RESET"\n%-20s:"BLUE" %s"RESET"\n%-20s:"BLUE" %s"RESET \
+                                "\n%-20s:"BLUE" %s"RESET"\n\n", "User", userdb[i].name, "Phone", userdb[i].phone,
+                                                        "Email", userdb[i].email,
                                                         "Password", userdb[i].pass);
                     }
                     printf("Press"BLUE" 1"RESET" to user_sector or"BLUE" <enter>"RESET" to admin: ");
@@ -808,8 +810,8 @@ void funcCall(void(*f)(), char *fname){
 */
 void exitProgram(){
     saveAllData();
-    encrypt_file("data.csv");
-    delete_file_data("data.csv");
+    // encrypt_file("data.csv");
+    // delete_file_data("data.csv");
     exit(0);
 }
 // id,name,nrc,email,pass,phone,address,curr_amt,income,loan_amt,loan_rate,isPer,acc_status,loan_status,translimit,records,transactions
