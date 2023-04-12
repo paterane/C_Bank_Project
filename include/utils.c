@@ -92,7 +92,7 @@ int indexOf(char *str, char *idxStr){
  * */
 char *subString(char *str, int idxA, int idxB){
     int length = stringLen(str); int x = 0;
-    char *result = (char*)(malloc(length*sizeof(char)));
+    char *result = (char*)(malloc((length+1)*sizeof(char)));
     if(idxA >= length || idxB > (length+1) || idxA >= idxB){
         printf(RED"[ERROR!] indexing invalid!!!\n"RESET);
         return NULL;
@@ -154,7 +154,7 @@ void stringConcat(char **main, char *sub){
 char *readLine_csv(char *str, char dl){
     char qt = '"';
     int len = stringLen(str);
-    char *buff;
+    char *buff = NULL;
     if(tkString == NULL){
         tkString = (char*)malloc((len+1)*sizeof(char));
         stringCopy(str, tkString);
@@ -171,10 +171,10 @@ char *readLine_csv(char *str, char dl){
         }
     }
     for(int i=tkIndex; i<=len; i++){
-        if(str[i] == dl || str[i] == '\0'){
-            if(i > tkIndex)
+        if((str[i] == dl) || (str[i] == '\0')){
+            if(i > tkIndex) 
                 buff=subString(str,tkIndex,i);
-            else
+            else 
                 buff="nan";
             tkIndex = i+1;
             break;
@@ -421,6 +421,30 @@ void password_input(char *buffer){
     }
     printf("%c", '\n');
     buffer[pos] = 0;
+}
+/*
+    You are only allowed to type in numbers
+*/
+void digit_input(int *buffer){
+    char ch = 0;
+    int pos = 0;
+    char temp[100];
+    while((ch=getch()) != '\r'){
+        if(ch >= '0' && ch <= '9'){
+            printf("%c", ch);
+            temp[pos++] = ch;
+        }
+        else if(ch == 8 && pos > 0){ // if ch == backspace
+                printf("\b%c\b", ' ');
+                pos--;
+        }
+        else if(ch == 3){
+            exit(1);
+        }
+    }
+    printf("%c", '\n');
+    temp[pos] = 0;
+    *buffer = toInt(temp);
 }
 //////////////////////////////////////////////////////////////////////////
 /* ***********************Time Related Functions*********************** */

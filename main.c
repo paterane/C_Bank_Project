@@ -11,7 +11,7 @@ int main(){
     // delete_file_data("data.csv");
     //decrypt_file("data.csv");
     loadingDataFromFile();
-    //delete_file_data("data.csv");
+    // //delete_file_data("data.csv");
     welcome();
 
     return 0;

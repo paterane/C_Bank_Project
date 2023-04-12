@@ -56,5 +56,6 @@ double diff_time_L(long end, long begin);
 long timeStruct_to_L(struct Date *timeInfo);
 int getch();
 void password_input(char *buffer);
+void digit_input(int *buffer);
 
 #endif // INCLUDE_UTILS_H
