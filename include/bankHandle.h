@@ -8,5 +8,6 @@
 void welcome();
 void loadingDataFromFile();
 void saveAllData();
+void pop_out_user(int idx);
 
 #endif //DIPLEVEL1_ZOOM_ONLINE_BANK_H

@@ -7,5 +7,4 @@ CMakeFiles/bank.dir/main.c.obj: D:\CClass\NCC_CLASS\Bank_Project\main.c \
  c:\mingw\lib\gcc\mingw32\6.3.0\include\stdarg.h \
  c:\mingw\include\stdlib.h \
  D:/CClass/NCC_CLASS/Bank_Project/include/bankHandle.h \
- D:/CClass/NCC_CLASS/Bank_Project/include/encrypt_decrypt.h \
- D:/CClass/NCC_CLASS/Bank_Project/include/utils.h
+ D:/CClass/NCC_CLASS/Bank_Project/include/encrypt_decrypt.h

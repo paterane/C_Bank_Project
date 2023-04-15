@@ -297,6 +297,65 @@ void burrow_repay(int uIdx, unsigned int amount, int process){
         }
     }
 }
+/*
+    copying user's data to current idx from next idx
+*/
+void shift_user_data(int curIdx, int nextIdx){
+    stringCopy(userdb[nextIdx].name, userdb[curIdx].name); 
+    stringCopy(userdb[nextIdx].nrc, userdb[curIdx].nrc);
+    stringCopy(userdb[nextIdx].email, userdb[curIdx].email);
+    stringCopy(userdb[nextIdx].pass, userdb[curIdx].pass);
+    stringCopy(userdb[nextIdx].phone, userdb[curIdx].phone);
+    stringCopy(userdb[nextIdx].address, userdb[curIdx].address);
+    userdb[curIdx].curr_amt = userdb[nextIdx].curr_amt;
+    userdb[curIdx].income = userdb[nextIdx].income;
+    userdb[curIdx].loan_amt = userdb[nextIdx].loan_amt;
+    userdb[curIdx].loan_rate = userdb[nextIdx].loan_rate;
+    userdb[curIdx].isAdmin = userdb[nextIdx].isAdmin;
+    userdb[curIdx].isPer = userdb[nextIdx].isPer;
+    userdb[curIdx].acc_status = userdb[nextIdx].acc_status;
+    userdb[curIdx].loan_status = userdb[nextIdx].loan_status;
+    userdb[curIdx].p_count = userdb[nextIdx].p_count;
+    userdb[curIdx].start.yy = userdb[nextIdx].start.yy;
+    userdb[curIdx].start.mm = userdb[nextIdx].start.mm;
+    userdb[curIdx].start.dd = userdb[nextIdx].start.dd;
+    userdb[curIdx].active = userdb[nextIdx].active;
+    userdb[curIdx].lock_time = userdb[nextIdx].lock_time;
+    userdb[curIdx].transLimit = userdb[nextIdx].transLimit;
+    userdb[curIdx].tIndex = userdb[nextIdx].tIndex;
+    for(int i=0; i<userdb[curIdx].tIndex;i++){
+        stringCopy(userdb[nextIdx].transfer[i].note, userdb[curIdx].transfer[i].note);
+    }
+    userdb[curIdx].rIndex = userdb[nextIdx].rIndex;
+    for(int i=0; i<userdb[curIdx].rIndex;i++){
+        stringCopy(userdb[nextIdx].receive[i].note, userdb[curIdx].receive[i].note);
+    }
+    userdb[curIdx].cIndex = userdb[nextIdx].cIndex;
+    for(int i=0; i<userdb[curIdx].cIndex;i++){
+        stringCopy(userdb[nextIdx].cashIn[i].note, userdb[curIdx].cashIn[i].note);
+    }
+    userdb[curIdx].wIndex = userdb[nextIdx].wIndex;
+    for(int i=0; i<userdb[curIdx].wIndex;i++){
+        stringCopy(userdb[nextIdx].withdraw[i].note, userdb[curIdx].withdraw[i].note);
+    }
+    userdb[curIdx].bIndex = userdb[nextIdx].bIndex;
+    for(int i=0; i<userdb[curIdx].bIndex;i++){
+        stringCopy(userdb[nextIdx].burrow[i].note, userdb[curIdx].burrow[i].note);
+    }
+    userdb[curIdx].pIndex = userdb[nextIdx].pIndex;
+    for(int i=0; i<userdb[curIdx].pIndex;i++){
+        stringCopy(userdb[nextIdx].repay[i].note, userdb[curIdx].repay[i].note);
+    }
+}
+/*
+    pop a user and re-arrange the db's content in order
+*/
+void pop_out_user(int idx){
+    dbIndex--;
+    for(int i=idx; i<dbIndex; i++){
+        shift_user_data(i, i+1);
+    }
+}
 user_sector(){
     char userIn[30];
     printf("User name >>"BLUE" %s "RESET"<<\n", userdb[userFound].name);
@@ -543,9 +602,10 @@ user_sector(){
         }
         else if(stringCmp(wordLower(userIn), "admin") && userdb[userFound].isAdmin){
             while(1){
-                printf(BLUE"show user"RESET" ,"BLUE"change admin"RESET" ,"BLUE"manage"RESET" or "BLUE"exit"RESET" to user_sector: ");
+                printf(BLUE"users"RESET" ,"BLUE"change admin"RESET" ,"BLUE"manage"RESET" ,"BLUE"remove"RESET" or " \
+                        BLUE"exit"RESET" to user_sector: ");
                 scanf(" %[^\n]%*c", userIn);
-                if(stringCmp(wordLower(userIn), "show user")){
+                if(stringCmp(wordLower(userIn), "users")){
                     for(int i=0; i<dbIndex; i++){
                         printf("%-20s:"BLUE" %s"RESET"\n%-20s:"BLUE" %s"RESET"\n%-20s:"BLUE" %s"RESET \
                                 "\n%-20s:"BLUE" %s"RESET"\n\n", "User", userdb[i].name, "Phone", userdb[i].phone,
@@ -619,7 +679,40 @@ user_sector(){
                                 if(stringCmp(wordLower(userIn), "yes\n")){
                                     userdb[uIndex].acc_status = 1;
                                     printf("The account has been unlocked successfully\n");
-                                }                              
+                                }                         
+                            }
+                            break;
+                        }
+                        else{
+                            printf(RED"Email not found\n"RESET);
+                            while(1){
+                                printf("Press"BLUE" <enter>"RESET" to admin or"BLUE" 1"RESET" to re-submit: ");
+                                fgets(userIn, 30, stdin);
+                                if(stringCmp(userIn, "\n")){
+                                    loopbreak = 1;
+                                    break;
+                                }
+                                else if(stringCmp(userIn, "1\n")) break;
+                                else printf(RED"Wrong Input\n"RESET);
+                            }
+                            if(loopbreak) break;
+                        }
+                    }
+                }
+                else if(stringCmp(wordLower(userIn), "remove")){
+                    printf(GREEN"Permanently delete an account\n"RESET);
+                    while(1){
+                        int loopbreak = 0;
+                        printf("%-15s: ", "Enter Email");
+                        scanf(" %[^\n]%*c", userIn);
+                        isEmailExisted(userIn);
+                        if(uIndex != -1 && uIndex != userFound){
+                            printf("%-15s>>> "BLUE"%s, %s\n"RESET,"User found", userdb[uIndex].name, userdb[uIndex].email);
+                            printf(YELLOW"Are you sure to remove %s?[yes/no][no]: "RESET, userdb[uIndex].name);
+                            fgets(userIn, 30, stdin);
+                            if(stringCmp(wordLower(userIn), "yes\n")){
+                                pop_out_user(uIndex);
+                                printf("The account has been successfully removed.\n");
                             }
                             break;
                         }
@@ -640,6 +733,7 @@ user_sector(){
                     }
                 }
                 else if(stringCmp(wordLower(userIn), "exit")) user_sector();
+                else printf(RED"Wrong Input\n"RESET);
             }
 
         }
@@ -903,8 +997,14 @@ void funcCall(void(*f)(), char *fname){
     while(1){
         printf("Press"BLUE" <enter>"RESET" to main page or"BLUE" 1"RESET" to %s: ", fname);
         fgets(userIn, 30, stdin);
-        if(stringCmp(userIn, "\n")) welcome();
-        else if(stringCmp(userIn, "1\n"))    f();
+        if(stringCmp(userIn, "\n")){
+            welcome();
+            break;
+        }
+        else if(stringCmp(userIn, "1\n")){
+            f();
+            break;
+        }
         else printf(RED"Wrong Input\n"RESET);
     }
 }
